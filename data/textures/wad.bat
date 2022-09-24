@@ -114,5 +114,7 @@ window087c.png ^
 window090.png ^
 window097.png ^
 window098.png ^
-window102.png
+window102.png ^
+openart_veneer.png ^
+openart_grass.png
 pause

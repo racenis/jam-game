@@ -28,6 +28,8 @@ using namespace Core;
 using namespace Core::Render;
 using namespace Core::UI;
 
+Player* pler = nullptr;
+
 int main() {
     std::cout << "Hello World! I have autism!" << std::endl;
     //std::cout << std::filesystem::current_path() << std::endl;
@@ -70,8 +72,8 @@ int main() {
     demo->SetName(UID("demo"));
     demo->LoadFromDisk();
     //demo->Load();
-    demo->SetInterior(true);
-    demo->SetInteriorLights(true);
+    //demo->SetInterior(true);
+    //demo->SetInteriorLights(true);
     
 
 
@@ -79,6 +81,7 @@ int main() {
     Player player;
     player.SetLocation(0.0f, 1.0f, 0.0f);
     player.Load();
+    pler = &player;
 
 
 
@@ -130,6 +133,15 @@ int main() {
     //derp_player->Init();
     
     //auto crate_ent = Entity::Find(UID("estijs"));
+    
+    
+    
+    
+    
+    KeyActionBindings[GLFW_KEY_R]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ glm::vec3 ploc; pler->GetLocation(ploc); ploc += glm::vec3(0.0f, 3.0f, 0.0f); pler->SetLocation(ploc); }};
+    
+    
+    
         
     while(!SHOULD_CLOSE){
         UI::Update();

@@ -22,7 +22,7 @@
         <IncludePath Value="../tram-sdk/src"/>
         <IncludePath Value="../tram-sdk/libraries"/>
       </Compiler>
-      <Linker Options="-lglfw3;-lgdi32;-lopengl32" Required="yes">
+      <Linker Options="-lglfw3;-lgdi32;-lopengl32;-static;-static-libstdc++" Required="yes">
         <LibraryPath Value="../tram-sdk/libraries"/>
         <Library Value="libBulletSoftBody.a"/>
         <Library Value="libBulletDynamics.a"/>

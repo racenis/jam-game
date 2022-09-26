@@ -63,6 +63,9 @@ int main() {
     floppaidle.LoadFromDisk();
     bingusidle.LoadFromDisk();
     
+    Animation monster_animations (UID("creatures/moshkis"));
+    monster_animations.LoadFromDisk();
+    
     // audios
     Audio::Sound derp (UID("derp"));
     //derp.LoadFromDisk();
@@ -79,19 +82,19 @@ int main() {
 
     // create the player entity
     Player player;
-    player.SetLocation(37.0f, 1.0f, 22.0f);
+    player.SetLocation(37.0f, 1.0f, -22.0f);
     player.Load();
     pler = &player;
 
 
 
     // create the mongus model
-    //RenderComponent* monguser = PoolProxy<RenderComponent>::New();
-    //monguser->SetModel(UID("mongus"));
-    //monguser->SetPose(poseList.begin().ptr);
-    //monguser->Init();
-    //monguser->UpdateLocation(glm::vec3(0.0f, 10.0f, 0.0f));
-    //monguser->UpdateRotation(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
+    RenderComponent* monguser = PoolProxy<RenderComponent>::New();
+    monguser->SetModel(UID("creatures/moshkis"));
+    monguser->SetPose(poseList.begin().ptr);
+    monguser->Init();
+    monguser->UpdateLocation(glm::vec3(37.0f, 1.0f, -22.0f));
+    monguser->UpdateRotation(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
 
     // create a light
     LightComponent* lit = PoolProxy<LightComponent>::New();
@@ -100,12 +103,12 @@ int main() {
     lit->UpdateDistance(100.0f);
 
     // create the animation player for the mongus model
-    //ArmatureComponent* monguser_armature = PoolProxy<ArmatureComponent>::New();
-    //monguser_armature->SetModel(UID("mongus"));
-    //monguser_armature->Init();
+    ArmatureComponent* monguser_armature = PoolProxy<ArmatureComponent>::New();
+    monguser_armature->SetModel(UID("creatures/moshkis"));
+    monguser_armature->Init();
 
     // link the mongus model and his animation player
-    //monguser->SetPose(monguser_armature->GetPosePtr());
+    monguser->SetPose(monguser_armature->GetPosePtr());
     
     // turn on physics drawing
     //DRAW_PHYSICS_DEBUG = true;
@@ -182,6 +185,7 @@ int main() {
 
         if(tick == 100){
             //derp_player->Play();
+            monguser_armature->PlayAnimation(UID("MoshkisWalk"), -1, 1.0f, 1.0f);
         }
         
 

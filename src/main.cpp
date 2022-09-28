@@ -71,12 +71,44 @@ int main() {
     //derp.LoadFromDisk();
 
     // loading the demo level
-    auto demo = PoolProxy<WorldCell>::New();
-    demo->SetName(UID("demo"));
-    demo->LoadFromDisk();
+    //auto demo = PoolProxy<WorldCell>::New();
+    //demo->SetName(UID("demo"));
+    //demo->LoadFromDisk();
     //demo->Load();
     //demo->SetInterior(true);
     //demo->SetInteriorLights(true);
+    
+    WorldCell* outside1 = PoolProxy<WorldCell>::New();
+    WorldCell* outside2 = PoolProxy<WorldCell>::New();
+    WorldCell* factory1 = PoolProxy<WorldCell>::New();
+    WorldCell* factory2 = PoolProxy<WorldCell>::New();
+    WorldCell* dungeon1 = PoolProxy<WorldCell>::New();
+    WorldCell* dungeon2 = PoolProxy<WorldCell>::New();
+    WorldCell* minima = PoolProxy<WorldCell>::New();
+    
+    outside1->SetName(UID("outside1"));
+    outside2->SetName(UID("outside2"));
+    factory1->SetName(UID("factory1"));
+    factory2->SetName(UID("factory2"));
+    dungeon1->SetName(UID("dungeon1"));
+    dungeon2->SetName(UID("dungeon2"));
+    minima->SetName(UID("minima"));
+    
+    outside1->LoadFromDisk();
+    outside2->LoadFromDisk();
+    factory1->LoadFromDisk();
+    factory2->LoadFromDisk();
+    dungeon1->LoadFromDisk();
+    dungeon2->LoadFromDisk();
+    minima->LoadFromDisk();
+    
+    outside1->SetInterior(false); outside1->SetInteriorLights(false);
+    outside2->SetInterior(false); outside2->SetInteriorLights(false);
+    factory1->SetInterior(true); factory1->SetInteriorLights(true);
+    factory2->SetInterior(true); factory2->SetInteriorLights(true);
+    dungeon1->SetInterior(true); dungeon1->SetInteriorLights(true);
+    dungeon2->SetInterior(true); dungeon2->SetInteriorLights(true);
+    minima->SetInterior(true); minima->SetInteriorLights(true);
     
 
 

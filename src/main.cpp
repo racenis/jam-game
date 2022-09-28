@@ -30,32 +30,157 @@ using namespace Core::UI;
 
 Player* pler = nullptr;
 
+class PlayerStuff {
+public:
+    PlayerStuff (Player* player) {
+        this->player = player;
+        
+        viewmodel = PoolProxy<RenderComponent>::New();
+        viewmodel->SetModel(UID("items/viewmodel_aamuris"));
+        viewmodel->SetPose(poseList.begin().ptr);
+        viewmodel->Init();
+        viewmodel->UpdateLocation(glm::vec3(37.0f, 1.0f, -22.0f));
+        viewmodel->UpdateRotation(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
+
+        viewmodel_animator = PoolProxy<ArmatureComponent>::New();
+        viewmodel_animator->SetModel(UID("items/viewmodel_aamuris"));
+        viewmodel_animator->Init();
+
+        viewmodel->SetPose(viewmodel_animator->GetPosePtr());
+    }
+    
+    void Update() {
+        if (!viewmodel_animator->IsReady()) return;
+        
+        viewmodel->UpdateLocation(Render::CAMERA_POSITION - glm::vec3(0.0f, 0.35f, 0.0f));
+        viewmodel->UpdateRotation(Render::CAMERA_ROTATION);
+        
+        if (player_state == PLAYER_HAMMER_IDLING && !viewmodel_animator->IsPlayingAnimation(UID("AamursIdle"))) {
+            viewmodel_animator->PlayAnimation(UID("AamursIdle"), -1, 1.0f, 1.0f);
+        }
+        
+        if (player_state == PLAYER_RIFLE_IDLING && !viewmodel_animator->IsPlayingAnimation(UID("RifleIdle"))) {
+            viewmodel_animator->PlayAnimation(UID("RifleIdle"), -1, 1.0f, 1.0f);
+        }
+        
+        if (player_state == PLAYER_STAPLER_IDLING && !viewmodel_animator->IsPlayingAnimation(UID("StaplerIdle"))) {
+            viewmodel_animator->PlayAnimation(UID("StaplerIdle"), -1, 1.0f, 1.0f);
+        }
+        
+        // it would probably be best if these were driven by events or something
+        if (player_state == PLAYER_RIFLE_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("AamursFire"))) {
+            player_state = PLAYER_RIFLE_IDLING;
+        }
+        
+        if (player_state == PLAYER_RIFLE_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("RifleFire"))) {
+            player_state = PLAYER_RIFLE_IDLING;
+        }
+        
+        if (player_state == PLAYER_RIFLE_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("StaplerFire"))) {
+            player_state = PLAYER_RIFLE_IDLING;
+        }
+        
+        if (UI::ismouse_left) {
+            if (player_state == PLAYER_HAMMER_IDLING) {
+                viewmodel_animator->StopAnimation(UID("AamursIdle"));
+                viewmodel_animator->PlayAnimation(UID("AamursFire"), 1, 1.0f, 1.0f);
+            
+                player_state = PLAYER_HAMMER_FIRING;
+            }
+            
+            if (player_state == PLAYER_RIFLE_IDLING) {
+                viewmodel_animator->StopAnimation(UID("RifleIdle"));
+                viewmodel_animator->PlayAnimation(UID("RifleFire"), 1, 1.0f, 1.0f);
+            
+                player_state = PLAYER_RIFLE_FIRING;
+            }
+            
+            if (player_state == PLAYER_STAPLER_IDLING) {
+                viewmodel_animator->StopAnimation(UID("StaplerIdle"));
+                viewmodel_animator->PlayAnimation(UID("StaplerFire"), 1, 1.0f, 1.0f);
+            
+                player_state = PLAYER_STAPLER_FIRING;
+            }
+        }
+    }
+    
+    void SwitchWeapon() {
+        if (player_state == PLAYER_HAMMER_IDLING) {
+            viewmodel_animator->StopAnimation(UID("AamursIdle"));
+        } else if (player_state == PLAYER_RIFLE_IDLING) {
+            viewmodel_animator->StopAnimation(UID("RifleIdle"));
+        } else if (player_state == PLAYER_STAPLER_IDLING) {
+            viewmodel_animator->StopAnimation(UID("StaplerIdle"));
+        } else {
+            return;
+        }
+        
+        
+        // if you don't restart the components, then the models won't get updated
+        // kinda dumb, but will fix later sometime
+        viewmodel->Uninit();
+        viewmodel_animator->Uninit();
+        
+        if (player_state == PLAYER_HAMMER_IDLING && rifle_ammo) {
+            viewmodel->SetModel(UID("items/viewmodel_rifle"));
+            viewmodel_animator->SetModel(UID("items/viewmodel_rifle"));
+            player_state = PLAYER_RIFLE_IDLING;
+        } else if ((player_state == PLAYER_HAMMER_IDLING || player_state == PLAYER_RIFLE_IDLING) && stapler_ammo) {
+            viewmodel->SetModel(UID("items/viewmodel_stapler"));
+            viewmodel_animator->SetModel(UID("items/viewmodel_stapler"));
+            player_state = PLAYER_STAPLER_IDLING;
+        } else {
+            viewmodel->SetModel(UID("items/viewmodel_aamuris"));
+            viewmodel_animator->SetModel(UID("items/viewmodel_aamuris"));
+            player_state = PLAYER_HAMMER_IDLING;
+        }
+        
+        viewmodel->Init();
+        viewmodel_animator->Init();
+        viewmodel->SetPose(viewmodel_animator->GetPosePtr());
+    }
+    
+    Player* player;
+    RenderComponent* viewmodel;
+    ArmatureComponent* viewmodel_animator;
+    
+    enum {
+        PLAYER_HAMMER_IDLING,
+        PLAYER_RIFLE_IDLING,
+        PLAYER_STAPLER_IDLING,
+        PLAYER_HAMMER_FIRING,
+        PLAYER_RIFLE_FIRING,
+        PLAYER_STAPLER_FIRING,
+    } player_state = PLAYER_HAMMER_IDLING;
+    
+    uint32_t hammer_ammo = 10;
+    uint32_t rifle_ammo = 10;
+    uint32_t stapler_ammo = 10;
+};
+
+PlayerStuff* main_player_stuff = nullptr;
+
 int main() {
     std::cout << "Dziiviibas Partikula v0.1-alpha" << std::endl;
-    //std::cout << std::filesystem::current_path() << std::endl;
 
-    // register the entity types, so that they can be loaded from level files
     Entity::Register("staticwobj", [](std::string_view& params) -> Entity* {return new StaticWorldObject(params);});
     Entity::Register("crate", [](std::string_view& params) -> Entity* {return new Crate(params);});
 
-    Core::Init();           // core init should always be first
+    Core::Init();
     UI::Init();
-    Physics::InitPhysics(); // optional, but needed for StaticWorldObject, Crate and Player entities
-    Render::Init();         // render init must always come after the ui inited
-    Async::Init();          // async init must always come after render init
+    Physics::InitPhysics();
+    Render::Init();
+    Async::Init();
     Audio::Init();
 
-    // any kind of material or model loading must happen after both ui and render are inited
+    // I think I should move this into engine code
     Material::SetErrorMaterial(new Material(UID("defaulttexture"), Material::TEXTURE));
     Model::SetErrorModel(new Model(UID("errorstatic")));
 
-    // load all of the language strings
     LoadText("data/lv.lang");
 
-    // texture info stuff
     Material::LoadMaterialInfo("data/texture.list");
 
-    // animations
     Animation mongusrun(UID("mongus"));
     Animation floppaidle(UID("turtle"));
     Animation bingusidle(UID("bingus_idle"));
@@ -66,18 +191,19 @@ int main() {
     Animation monster_animations (UID("creatures/moshkis"));
     monster_animations.LoadFromDisk();
     
+    Animation viewmodel_animations (UID("items/viewmodels"));
+    viewmodel_animations.LoadFromDisk();
+    
+    // adding references to viewmodels, so that they get loaded first
+    Model::Find(UID("items/viewmodel_aamuris"))->AddRef();
+    Model::Find(UID("items/viewmodel_rifle"))->AddRef();
+    Model::Find(UID("items/viewmodel_stapler"))->AddRef();
+    
     // audios
     Audio::Sound derp (UID("derp"));
     //derp.LoadFromDisk();
 
-    // loading the demo level
-    //auto demo = PoolProxy<WorldCell>::New();
-    //demo->SetName(UID("demo"));
-    //demo->LoadFromDisk();
-    //demo->Load();
-    //demo->SetInterior(true);
-    //demo->SetInteriorLights(true);
-    
+
     WorldCell* outside1 = PoolProxy<WorldCell>::New();
     WorldCell* outside2 = PoolProxy<WorldCell>::New();
     WorldCell* factory1 = PoolProxy<WorldCell>::New();
@@ -127,66 +253,13 @@ int main() {
     player.Load();
     pler = &player;
 
+    PlayerStuff playerstuff(&player);
+    main_player_stuff = &playerstuff;
 
-
-    // create the mongus model
-    RenderComponent* monguser = PoolProxy<RenderComponent>::New();
-    monguser->SetModel(UID("creatures/moshkis"));
-    monguser->SetPose(poseList.begin().ptr);
-    monguser->Init();
-    monguser->UpdateLocation(glm::vec3(37.0f, 1.0f, -22.0f));
-    monguser->UpdateRotation(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
-
-    // create a light
-    LightComponent* lit = PoolProxy<LightComponent>::New();
-    lit->Init();
-    lit->UpdateColor(glm::vec3(1.0f, 0.0f, 1.0f));
-    lit->UpdateDistance(100.0f);
-
-    // create the animation player for the mongus model
-    ArmatureComponent* monguser_armature = PoolProxy<ArmatureComponent>::New();
-    monguser_armature->SetModel(UID("creatures/moshkis"));
-    monguser_armature->Init();
-
-    // link the mongus model and his animation player
-    monguser->SetPose(monguser_armature->GetPosePtr());
-    
-    // turn on physics drawing
-    //DRAW_PHYSICS_DEBUG = true;
-    
-    
-    /*auto tolet_sprite = new Sprite;
-    tolet_sprite->SetMaterial(Material::Find(UID("poland")));
-    tolet_sprite->AutogenTiledFrames(0, 0, 40, 40, 6, 24, 15.0f, 1.0f);
-    
-    auto tolet_spinner = PoolProxy<SpriteComponent>::New();
-    tolet_spinner->SetSprite(tolet_sprite);
-    tolet_spinner->UpdateLocation(glm::vec3(0.0f, 1.2f, -2.0f));
-    tolet_spinner->Init();
-    tolet_spinner->Play();
-    
-    auto tolet_emitter = PoolProxy<ParticleComponent>::New();
-    tolet_emitter->SetSprite(tolet_sprite);
-    tolet_emitter->UpdateLocation(glm::vec3(0.0f, 1.2f, -2.0f));
-    tolet_emitter->Init();*/
-    
-    //auto derp_player = PoolProxy<AudioComponent>::New();
-    //derp_player->UpdateLocation(glm::vec3(0.0f, 0.0f, 0.0f));
-    //derp_player->SetSound(&derp);
-    //derp_player->SetRepeating(true);
-    //derp_player->Init();
-    
-    //auto crate_ent = Entity::Find(UID("estijs"));
-    
-    
-    
-    
-    
     KeyActionBindings[GLFW_KEY_R]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ glm::vec3 ploc; pler->GetLocation(ploc); ploc += glm::vec3(0.0f, 3.0f, 0.0f); pler->SetLocation(ploc); }};
     
+    KeyActionBindings[GLFW_KEY_Q]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ main_player_stuff->SwitchWeapon(); }};
     
-    
-        
     while(!SHOULD_CLOSE){
         UI::Update();
 
@@ -206,12 +279,7 @@ int main() {
         static int tick = 0;
         tick++;
 
-        // this will make the light spin
-        lit->UpdateLocation(glm::vec3(cos(((float)tick) / 60.0f) * 5.0f, 0.01 ,sin(((float)tick) / 60.0f) * 5.0f));
-        
-        // this makes the mongus model bob up and down
-        //monguser->UpdateLocation(glm::vec3(0.0f, 0.5f + sin(((float)tick) / 45.0f)*0.1f, 0.0f));
-        
+        playerstuff.Update();
         
         GUI::Begin();
         GUI::DebugMenu();
@@ -224,11 +292,6 @@ int main() {
         Async::ResourceLoader2ndStage();
         Async::FinishResource();
 
-        if(tick == 100){
-            //derp_player->Play();
-            monguser_armature->PlayAnimation(UID("MoshkisWalk"), -1, 1.0f, 1.0f);
-        }
-        
 
         //std::cout << crate_ent << std::endl;
 

@@ -1,0 +1,4 @@
+# cell 0 0
+staticwobj outside1worldspawn 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 none maps/outside1 fullbright
+staticwobj outside1bworldspawn 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 none maps/outside1b fullbright
+staticwobj outside1cworldspawn 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 none maps/outside1c fullbright

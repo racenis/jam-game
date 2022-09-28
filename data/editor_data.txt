@@ -1,0 +1,7 @@
+dungeon1
+dungeon2
+factory1
+factory2
+minima
+outside1
+outside2

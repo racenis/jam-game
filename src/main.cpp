@@ -104,11 +104,20 @@ int main() {
     
     outside1->SetInterior(false); outside1->SetInteriorLights(false);
     outside2->SetInterior(false); outside2->SetInteriorLights(false);
-    factory1->SetInterior(true); factory1->SetInteriorLights(true);
-    factory2->SetInterior(true); factory2->SetInteriorLights(true);
-    dungeon1->SetInterior(true); dungeon1->SetInteriorLights(true);
-    dungeon2->SetInterior(true); dungeon2->SetInteriorLights(true);
-    minima->SetInterior(true); minima->SetInteriorLights(true);
+    factory1->SetInterior(true); factory1->SetInteriorLights(false);
+    factory2->SetInterior(true); factory2->SetInteriorLights(false);
+    dungeon1->SetInterior(true); dungeon1->SetInteriorLights(false);
+    dungeon2->SetInterior(true); dungeon2->SetInteriorLights(false);
+    minima->SetInterior(true); minima->SetInteriorLights(false);
+    
+    outside1->AddLink(outside2);
+    outside1->AddLink(dungeon1);
+    outside1->AddLink(minima);
+    
+    outside2->AddLink(outside1);
+    outside2->AddLink(dungeon2);
+    outside2->AddLink(factory1);
+    outside2->AddLink(factory2);
     
 
 

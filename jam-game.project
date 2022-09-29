@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="jam-game" Version="11000" InternalType="Console">
   <VirtualDirectory Name="src">
+    <File Name="src/jamgame.h"/>
+    <File Name="src/moshkiscomponent.h"/>
+    <File Name="src/moshkiscomponent.cpp"/>
+    <File Name="src/moshkis.h"/>
+    <File Name="src/moshkis.cpp"/>
     <File Name="src/tram-sdk.cpp"/>
     <File Name="src/main.cpp"/>
   </VirtualDirectory>

@@ -66,7 +66,7 @@ AS       := C:/mingw64/bin/as.exe
 CodeLiteDir:=C:\Program Files\CodeLite
 WXWIN:=C:\Users\Poga\Desktop\miskaste\wxwidgets
 WXCFG:=gcc_dll\mswu
-Objects0=$(IntermediateDirectory)/src_main.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/src_main.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_moshkis.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_moshkiscomponent.cpp$(ObjectSuffix) 
 
 
 
@@ -112,6 +112,22 @@ $(IntermediateDirectory)/src_tram-sdk.cpp$(DependSuffix): src/tram-sdk.cpp
 
 $(IntermediateDirectory)/src_tram-sdk.cpp$(PreprocessSuffix): src/tram-sdk.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_tram-sdk.cpp$(PreprocessSuffix) src/tram-sdk.cpp
+
+$(IntermediateDirectory)/src_moshkis.cpp$(ObjectSuffix): src/moshkis.cpp $(IntermediateDirectory)/src_moshkis.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/Poga/Desktop/painis/jam-game/src/moshkis.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_moshkis.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/src_moshkis.cpp$(DependSuffix): src/moshkis.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/src_moshkis.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/src_moshkis.cpp$(DependSuffix) -MM src/moshkis.cpp
+
+$(IntermediateDirectory)/src_moshkis.cpp$(PreprocessSuffix): src/moshkis.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_moshkis.cpp$(PreprocessSuffix) src/moshkis.cpp
+
+$(IntermediateDirectory)/src_moshkiscomponent.cpp$(ObjectSuffix): src/moshkiscomponent.cpp $(IntermediateDirectory)/src_moshkiscomponent.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/Poga/Desktop/painis/jam-game/src/moshkiscomponent.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_moshkiscomponent.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/src_moshkiscomponent.cpp$(DependSuffix): src/moshkiscomponent.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/src_moshkiscomponent.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/src_moshkiscomponent.cpp$(DependSuffix) -MM src/moshkiscomponent.cpp
+
+$(IntermediateDirectory)/src_moshkiscomponent.cpp$(PreprocessSuffix): src/moshkiscomponent.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_moshkiscomponent.cpp$(PreprocessSuffix) src/moshkiscomponent.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

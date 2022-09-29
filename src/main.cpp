@@ -13,6 +13,7 @@
 #include <entities/crate.h>
 #include <entities/staticworldobject.h>
 #include <entities/player.h>
+#include "moshkis.h"
 
 #include <components/rendercomponent.h>
 #include <components/armaturecomponent.h>
@@ -23,12 +24,17 @@
 #include <components/audiocomponent.h>
 
 #include <components/controllercomponent.h>
+#include <components/physicscomponent.h>
+
+#include "moshkiscomponent.h"
+
+#include "jamgame.h"
 
 using namespace Core;
 using namespace Core::Render;
 using namespace Core::UI;
 
-Player* pler = nullptr;
+Player* main_player = nullptr;
 
 class PlayerStuff {
 public:
@@ -36,14 +42,14 @@ public:
         this->player = player;
         
         viewmodel = PoolProxy<RenderComponent>::New();
-        viewmodel->SetModel(UID("items/viewmodel_aamuris"));
+        viewmodel->SetModel(UID("items/viewmodel_stapler"));
         viewmodel->SetPose(poseList.begin().ptr);
         viewmodel->Init();
         viewmodel->UpdateLocation(glm::vec3(37.0f, 1.0f, -22.0f));
         viewmodel->UpdateRotation(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
 
         viewmodel_animator = PoolProxy<ArmatureComponent>::New();
-        viewmodel_animator->SetModel(UID("items/viewmodel_aamuris"));
+        viewmodel_animator->SetModel(UID("items/viewmodel_stapler"));
         viewmodel_animator->Init();
 
         viewmodel->SetPose(viewmodel_animator->GetPosePtr());
@@ -68,38 +74,54 @@ public:
         }
         
         // it would probably be best if these were driven by events or something
-        if (player_state == PLAYER_RIFLE_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("AamursFire"))) {
-            player_state = PLAYER_RIFLE_IDLING;
+        if (player_state == PLAYER_HAMMER_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("AamursFire"))) {
+            player_state = PLAYER_HAMMER_IDLING;
         }
         
         if (player_state == PLAYER_RIFLE_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("RifleFire"))) {
             player_state = PLAYER_RIFLE_IDLING;
         }
         
-        if (player_state == PLAYER_RIFLE_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("StaplerFire"))) {
-            player_state = PLAYER_RIFLE_IDLING;
+        if (player_state == PLAYER_STAPLER_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("StaplerFire"))) {
+            player_state = PLAYER_STAPLER_IDLING;
         }
         
         if (UI::ismouse_left) {
-            if (player_state == PLAYER_HAMMER_IDLING) {
-                viewmodel_animator->StopAnimation(UID("AamursIdle"));
-                viewmodel_animator->PlayAnimation(UID("AamursFire"), 1, 1.0f, 1.0f);
-            
-                player_state = PLAYER_HAMMER_FIRING;
-            }
-            
             if (player_state == PLAYER_RIFLE_IDLING) {
                 viewmodel_animator->StopAnimation(UID("RifleIdle"));
                 viewmodel_animator->PlayAnimation(UID("RifleFire"), 1, 1.0f, 1.0f);
-            
+                
+                auto result = Physics::Raycast(Render::CAMERA_POSITION, Render::CAMERA_POSITION + ((Render::CAMERA_ROTATION * Render::CAMERA_FORWARD)) * 100.0f);
+                if (result && result->GetParent()) {
+                    auto target_ent = result->GetParent();
+                    if (typeid(*target_ent) == typeid(Moshkis)) {
+                        Message msg {.type = Message::ACTIVATE, .data = (void*)500};
+                        target_ent->MessageHandler(msg);
+                        std::cout << "HIT MOSHKIS!" <<std::endl;
+                    }
+                }
+        
                 player_state = PLAYER_RIFLE_FIRING;
-            }
-            
-            if (player_state == PLAYER_STAPLER_IDLING) {
+            } else if (player_state == PLAYER_STAPLER_IDLING) {
                 viewmodel_animator->StopAnimation(UID("StaplerIdle"));
                 viewmodel_animator->PlayAnimation(UID("StaplerFire"), 1, 1.0f, 1.0f);
             
+                auto result = Physics::Raycast(Render::CAMERA_POSITION, Render::CAMERA_POSITION + ((Render::CAMERA_ROTATION * Render::CAMERA_FORWARD)) * 100.0f);
+                if (result && result->GetParent()) {
+                    auto target_ent = result->GetParent();
+                    if (typeid(*target_ent) == typeid(Moshkis)) {
+                        float damage = 50.0f * (7.0f - glm::distance(player->GetLocation(), target_ent->GetLocation()));
+                        if (damage > 0.0f) {
+                            Message msg {.type = Message::ACTIVATE, .data = (void*)((uint64_t)(damage))};
+                            target_ent->MessageHandler(msg);
+                        }
+                        std::cout << "HIT MOSHKIS!" <<std::endl;
+                    }
+                }
+            
                 player_state = PLAYER_STAPLER_FIRING;
+            } else {
+                std::cout << "player is already firing" << std::endl;
             }
         }
     }
@@ -112,6 +134,7 @@ public:
         } else if (player_state == PLAYER_STAPLER_IDLING) {
             viewmodel_animator->StopAnimation(UID("StaplerIdle"));
         } else {
+            std::cout << "player is firing, so can't switch" << std::endl;
             return;
         }
         
@@ -121,18 +144,16 @@ public:
         viewmodel->Uninit();
         viewmodel_animator->Uninit();
         
-        if (player_state == PLAYER_HAMMER_IDLING && rifle_ammo) {
+        if (player_state == PLAYER_STAPLER_IDLING) {
             viewmodel->SetModel(UID("items/viewmodel_rifle"));
             viewmodel_animator->SetModel(UID("items/viewmodel_rifle"));
             player_state = PLAYER_RIFLE_IDLING;
-        } else if ((player_state == PLAYER_HAMMER_IDLING || player_state == PLAYER_RIFLE_IDLING) && stapler_ammo) {
+            std::cout << "switched player to stapler" << std::endl;
+        } else if (player_state == PLAYER_RIFLE_IDLING) {
             viewmodel->SetModel(UID("items/viewmodel_stapler"));
             viewmodel_animator->SetModel(UID("items/viewmodel_stapler"));
             player_state = PLAYER_STAPLER_IDLING;
-        } else {
-            viewmodel->SetModel(UID("items/viewmodel_aamuris"));
-            viewmodel_animator->SetModel(UID("items/viewmodel_aamuris"));
-            player_state = PLAYER_HAMMER_IDLING;
+            std::cout << "switched player to stapler" << std::endl;
         }
         
         viewmodel->Init();
@@ -151,7 +172,7 @@ public:
         PLAYER_HAMMER_FIRING,
         PLAYER_RIFLE_FIRING,
         PLAYER_STAPLER_FIRING,
-    } player_state = PLAYER_HAMMER_IDLING;
+    } player_state = PLAYER_STAPLER_IDLING;
     
     uint32_t hammer_ammo = 10;
     uint32_t rifle_ammo = 10;
@@ -165,6 +186,7 @@ int main() {
 
     Entity::Register("staticwobj", [](std::string_view& params) -> Entity* {return new StaticWorldObject(params);});
     Entity::Register("crate", [](std::string_view& params) -> Entity* {return new Crate(params);});
+    Entity::Register("moshkis", [](std::string_view& params) -> Entity* {return new Moshkis(params);});
 
     Core::Init();
     UI::Init();
@@ -180,13 +202,6 @@ int main() {
     LoadText("data/lv.lang");
 
     Material::LoadMaterialInfo("data/texture.list");
-
-    Animation mongusrun(UID("mongus"));
-    Animation floppaidle(UID("turtle"));
-    Animation bingusidle(UID("bingus_idle"));
-    mongusrun.LoadFromDisk();
-    floppaidle.LoadFromDisk();
-    bingusidle.LoadFromDisk();
     
     Animation monster_animations (UID("creatures/moshkis"));
     monster_animations.LoadFromDisk();
@@ -251,12 +266,12 @@ int main() {
     Player player;
     player.SetLocation(37.0f, 1.0f, -22.0f);
     player.Load();
-    pler = &player;
+    main_player = &player;
 
     PlayerStuff playerstuff(&player);
     main_player_stuff = &playerstuff;
 
-    KeyActionBindings[GLFW_KEY_R]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ glm::vec3 ploc; pler->GetLocation(ploc); ploc += glm::vec3(0.0f, 3.0f, 0.0f); pler->SetLocation(ploc); }};
+    KeyActionBindings[GLFW_KEY_R]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ glm::vec3 ploc; main_player->GetLocation(ploc); ploc += glm::vec3(0.0f, 3.0f, 0.0f); main_player->SetLocation(ploc); }};
     
     KeyActionBindings[GLFW_KEY_Q]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ main_player_stuff->SwitchWeapon(); }};
     
@@ -281,6 +296,16 @@ int main() {
 
         playerstuff.Update();
         
+        for (auto& comp : PoolProxy<MoshkisComponent>::GetPool()) comp.UpdateMoshkis();
+        
+        
+        
+        
+        
+        
+        
+        
+        
         GUI::Begin();
         GUI::DebugMenu();
         GUI::EscapeMenu();        
@@ -291,15 +316,6 @@ int main() {
         // this loads the models and textures into video memory
         Async::ResourceLoader2ndStage();
         Async::FinishResource();
-
-
-        //std::cout << crate_ent << std::endl;
-
-        if (tick > 50) {
-            //glm::vec3 crate_loc;
-            //crate_ent->GetLocation(crate_loc);
-            //derp_player->UpdateLocation(crate_loc);
-        }
 
 
         Event::Dispatch();

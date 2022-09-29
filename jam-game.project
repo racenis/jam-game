@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="jam-game" Version="11000" InternalType="Console">
   <VirtualDirectory Name="src">
+    <File Name="src/pickup.h"/>
+    <File Name="src/pickup.cpp"/>
     <File Name="src/jamgame.h"/>
     <File Name="src/moshkiscomponent.h"/>
     <File Name="src/moshkiscomponent.cpp"/>
@@ -27,7 +29,7 @@
         <IncludePath Value="../tram-sdk/src"/>
         <IncludePath Value="../tram-sdk/libraries"/>
       </Compiler>
-      <Linker Options="-lglfw3;-lgdi32;-lopengl32;-static;-static-libstdc++" Required="yes">
+      <Linker Options="-lglfw3;-lgdi32;-lopengl32;-static-libgcc;-static-libstdc++;-static" Required="yes">
         <LibraryPath Value="../tram-sdk/libraries"/>
         <Library Value="libBulletSoftBody.a"/>
         <Library Value="libBulletDynamics.a"/>

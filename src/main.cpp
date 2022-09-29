@@ -209,6 +209,9 @@ int main() {
     Animation viewmodel_animations (UID("items/viewmodels"));
     viewmodel_animations.LoadFromDisk();
     
+    Animation pisckup_animations (UID("items/pickups"));
+    pisckup_animations.LoadFromDisk();
+    
     // adding references to viewmodels, so that they get loaded first
     Model::Find(UID("items/viewmodel_aamuris"))->AddRef();
     Model::Find(UID("items/viewmodel_rifle"))->AddRef();
@@ -260,11 +263,10 @@ int main() {
     outside2->AddLink(factory1);
     outside2->AddLink(factory2);
     
-
-
-    // create the player entity
+    
     Player player;
-    player.SetLocation(37.0f, 1.0f, -22.0f);
+    //player.SetLocation(37.0f, 1.0f, -22.0f); // in the exit of dungeon1
+    player.SetLocation(0.0f, 8.5f, -15.5f); // in the start of dungeon1
     player.Load();
     main_player = &player;
 

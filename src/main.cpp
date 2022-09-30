@@ -14,6 +14,7 @@
 #include <entities/staticworldobject.h>
 #include <entities/player.h>
 #include "moshkis.h"
+#include "pickup.h"
 
 #include <components/rendercomponent.h>
 #include <components/armaturecomponent.h>
@@ -61,6 +62,8 @@ public:
         viewmodel->UpdateLocation(Render::CAMERA_POSITION - glm::vec3(0.0f, 0.35f, 0.0f));
         viewmodel->UpdateRotation(Render::CAMERA_ROTATION);
         
+        ticks_since_oof++;
+        
         if (player_state == PLAYER_HAMMER_IDLING && !viewmodel_animator->IsPlayingAnimation(UID("AamursIdle"))) {
             viewmodel_animator->PlayAnimation(UID("AamursIdle"), -1, 1.0f, 1.0f);
         }
@@ -87,7 +90,7 @@ public:
         }
         
         if (UI::ismouse_left) {
-            if (player_state == PLAYER_RIFLE_IDLING) {
+            if (player_state == PLAYER_RIFLE_IDLING && rifle_ammo) {
                 viewmodel_animator->StopAnimation(UID("RifleIdle"));
                 viewmodel_animator->PlayAnimation(UID("RifleFire"), 1, 1.0f, 1.0f);
                 
@@ -100,9 +103,9 @@ public:
                         std::cout << "HIT MOSHKIS!" <<std::endl;
                     }
                 }
-        
+                rifle_ammo--;
                 player_state = PLAYER_RIFLE_FIRING;
-            } else if (player_state == PLAYER_STAPLER_IDLING) {
+            } else if (player_state == PLAYER_STAPLER_IDLING && stapler_ammo) {
                 viewmodel_animator->StopAnimation(UID("StaplerIdle"));
                 viewmodel_animator->PlayAnimation(UID("StaplerFire"), 1, 1.0f, 1.0f);
             
@@ -115,13 +118,14 @@ public:
                             Message msg {.type = Message::ACTIVATE, .data = (void*)((uint64_t)(damage))};
                             target_ent->MessageHandler(msg);
                         }
+                        
                         std::cout << "HIT MOSHKIS!" <<std::endl;
                     }
                 }
-            
+                stapler_ammo--;
                 player_state = PLAYER_STAPLER_FIRING;
             } else {
-                std::cout << "player is already firing" << std::endl;
+                std::cout << "player is already firing or out of ammo" << std::endl;
             }
         }
     }
@@ -177,9 +181,27 @@ public:
     uint32_t hammer_ammo = 10;
     uint32_t rifle_ammo = 10;
     uint32_t stapler_ammo = 10;
+    int32_t player_health = 420;
+    
+    uint32_t ticks_since_oof = 100;
 };
 
 PlayerStuff* main_player_stuff = nullptr;
+
+void PlayerPickedUpPickup(Core::name_t pickup_model) {
+    std::cout << "PICKED UP " << ReverseUID(pickup_model) << std::endl;
+    
+    if (pickup_model == UID("items/pickups_lifeparticle")) main_player_stuff->player_health += 150;
+    if (pickup_model == UID("items/pickups_rifle")) main_player_stuff->rifle_ammo += 5;
+    if (pickup_model == UID("items/pickups_stapler")) main_player_stuff->stapler_ammo += 20;
+}
+
+void PlayerGotHitInFace(uint64_t oof_size) {
+    std::cout << "GOT HIT IN FACE " << oof_size << std::endl;
+    
+    main_player_stuff->ticks_since_oof = 0;
+    main_player_stuff->player_health -= oof_size;
+}
 
 int main() {
     std::cout << "Dziiviibas Partikula v0.1-alpha" << std::endl;
@@ -187,6 +209,7 @@ int main() {
     Entity::Register("staticwobj", [](std::string_view& params) -> Entity* {return new StaticWorldObject(params);});
     Entity::Register("crate", [](std::string_view& params) -> Entity* {return new Crate(params);});
     Entity::Register("moshkis", [](std::string_view& params) -> Entity* {return new Moshkis(params);});
+    Entity::Register("pickup", [](std::string_view& params) -> Entity* {return new Pickup(params);});
 
     Core::Init();
     UI::Init();
@@ -309,8 +332,23 @@ int main() {
         
         
         GUI::Begin();
-        GUI::DebugMenu();
-        GUI::EscapeMenu();        
+            GUI::DebugMenu();
+            GUI::EscapeMenu();
+        
+            GUI::Frame(Core::GUI::FRAME_BOTTOM, 50.0f);
+                char ammobuffer[100]; char healthbuffer[100];
+                if (playerstuff.player_state == PlayerStuff::PLAYER_STAPLER_IDLING || playerstuff.player_state == PlayerStuff::PLAYER_STAPLER_FIRING)
+                    sprintf(ammobuffer, "Ammunition: %d",  playerstuff.stapler_ammo);
+                else
+                    sprintf(ammobuffer, "Ammunition: %d",  playerstuff.rifle_ammo);
+                if (playerstuff.player_health > 0)
+                    sprintf(healthbuffer, "Health: %d", playerstuff.player_health);
+                else
+                    sprintf(healthbuffer, "YOURE DEAD: %d", playerstuff.player_health);
+                bool firing = playerstuff.player_state == PlayerStuff::PLAYER_RIFLE_FIRING || playerstuff.player_state == PlayerStuff::PLAYER_STAPLER_FIRING;
+                GUI::Text(ammobuffer, 1, Core::GUI::TEXT_CENTER, firing ? COLOR_DISABLED : COLOR_WHITE); GUI::FrameBreakLine();
+                GUI::Text(healthbuffer, 1, Core::GUI::TEXT_CENTER, playerstuff.ticks_since_oof > 100 ? COLOR_WHITE : glm::vec3(1.0f, ((float)playerstuff.ticks_since_oof)/100.0f, ((float)playerstuff.ticks_since_oof)/100.0f));
+            GUI::EndFrame();
         GUI::End();
         
         Audio::Update();

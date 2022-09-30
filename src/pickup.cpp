@@ -2,8 +2,22 @@
 #include <components/triggercomponent.h>
 #include <components/armaturecomponent.h>
 #include "pickup.h"
+#include "jamgame.h"
 
 namespace Core {
+    template <> Pool<PickupWorkaroundComponent> PoolProxy<PickupWorkaroundComponent>::pool("PickupWorkaroundComponent pool" , 50);
+    
+    void PickupWorkaroundComponent::Start() {
+        if (!is_ready) return;
+        assert(armcomp);
+        armcomp->PlayAnimation(UID("PickupSpin"), -1, 1.0f, 1.0f);
+    }
+    
+    void PickupWorkaroundComponent::MakeWorkaround(name_t model, ArmatureComponent* armcomp) {
+        this->armcomp = armcomp;
+        this->model.SetResource(Render::Model::Find(model));
+    }
+    
     Pickup::Pickup(std::string_view& str){
         Entity::SetParameters(str);
 
@@ -41,9 +55,12 @@ namespace Core {
         if (data->pickup_type == 2) armaturecomponent->SetModel(UID("items/pickups_stapler"));
 
         triggercomponent = PoolProxy<TriggerComponent>::New();
-        triggercomponent->SetModel(UID("creatures/moshkis"));
-        triggercomponent->SetCollisionMask(Physics::COLL_PLAYER);
-        triggercomponent->SetActivationCallback([](TriggerComponent* comp){ std::cout << "active" << std::endl; });
+        triggercomponent->SetLocation(location);
+        triggercomponent->SetRotation(rotation);
+        triggercomponent->SetParent(this);
+        triggercomponent->SetModel(UID("big_barrel"));
+        triggercomponent->SetActivationCallback([](TriggerComponent* comp){ Message msg { .type = Message::ACTIVATE }; comp->GetParent()->MessageHandler(msg); });
+        triggercomponent->SetFilterCallback([](TriggerComponent* trig, PhysicsComponent* comp){ return comp && comp->GetParent() && comp->GetParent()->GetName() == UID("player"); });
 
         delete serialized_data;
         serialized_data = nullptr;
@@ -54,9 +71,13 @@ namespace Core {
         
         rendercomponent->SetPose(armaturecomponent->GetPosePtr());
         
-        isloaded = true;
+        workaroundcomponent = PoolProxy<PickupWorkaroundComponent>::New();
+        if (data->pickup_type == 0) workaroundcomponent->MakeWorkaround(UID("items/pickups_lifeparticle"), armaturecomponent);
+        if (data->pickup_type == 1) workaroundcomponent->MakeWorkaround(UID("items/pickups_rifle"), armaturecomponent);
+        if (data->pickup_type == 2) workaroundcomponent->MakeWorkaround(UID("items/pickups_stapler"), armaturecomponent);
+        workaroundcomponent->Init();
         
-        armaturecomponent->PlayAnimation(UID("PickupSpin"), -1, 1.0f, 1.0f);
+        isloaded = true;
 
         UpdateParameters();
     }
@@ -69,6 +90,7 @@ namespace Core {
         rendercomponent->Uninit();
         armaturecomponent->Uninit();
         triggercomponent->Uninit();
+        workaroundcomponent->Uninit();
 
         PoolProxy<RenderComponent>::Delete(rendercomponent);
         rendercomponent = nullptr;
@@ -76,6 +98,8 @@ namespace Core {
         armaturecomponent = nullptr;
         PoolProxy<TriggerComponent>::Delete(triggercomponent);
         triggercomponent = nullptr;
+        PoolProxy<PickupWorkaroundComponent>::Delete(workaroundcomponent);
+        workaroundcomponent = nullptr;
 
     }
 
@@ -89,6 +113,9 @@ namespace Core {
     }
 
     void Pickup::MessageHandler(Message& msg){
-        return;
+        if (msg.type == Message::ACTIVATE) {
+            PlayerPickedUpPickup(rendercomponent->GetModel());
+            Yeet(); // this makes it commit suicide
+        }
     }
 }

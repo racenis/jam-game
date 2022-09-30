@@ -66,7 +66,7 @@ AS       := C:/mingw64/bin/as.exe
 CodeLiteDir:=C:\Program Files\CodeLite
 WXWIN:=C:\Users\Poga\Desktop\miskaste\wxwidgets
 WXCFG:=gcc_dll\mswu
-Objects0=$(IntermediateDirectory)/src_pickup.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_moshkis.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_moshkiscomponent.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_main.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_moshkis.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_moshkiscomponent.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_main.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_pickup.cpp$(ObjectSuffix) 
 
 
 
@@ -97,14 +97,6 @@ PreBuild:
 ##
 ## Objects
 ##
-$(IntermediateDirectory)/src_pickup.cpp$(ObjectSuffix): src/pickup.cpp $(IntermediateDirectory)/src_pickup.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/Poga/Desktop/painis/jam-game/src/pickup.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_pickup.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/src_pickup.cpp$(DependSuffix): src/pickup.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/src_pickup.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/src_pickup.cpp$(DependSuffix) -MM src/pickup.cpp
-
-$(IntermediateDirectory)/src_pickup.cpp$(PreprocessSuffix): src/pickup.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_pickup.cpp$(PreprocessSuffix) src/pickup.cpp
-
 $(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix): src/tram-sdk.cpp $(IntermediateDirectory)/src_tram-sdk.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/Poga/Desktop/painis/jam-game/src/tram-sdk.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/src_tram-sdk.cpp$(DependSuffix): src/tram-sdk.cpp
@@ -136,6 +128,14 @@ $(IntermediateDirectory)/src_main.cpp$(DependSuffix): src/main.cpp
 
 $(IntermediateDirectory)/src_main.cpp$(PreprocessSuffix): src/main.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_main.cpp$(PreprocessSuffix) src/main.cpp
+
+$(IntermediateDirectory)/src_pickup.cpp$(ObjectSuffix): src/pickup.cpp $(IntermediateDirectory)/src_pickup.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/Poga/Desktop/painis/jam-game/src/pickup.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_pickup.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/src_pickup.cpp$(DependSuffix): src/pickup.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/src_pickup.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/src_pickup.cpp$(DependSuffix) -MM src/pickup.cpp
+
+$(IntermediateDirectory)/src_pickup.cpp$(PreprocessSuffix): src/pickup.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_pickup.cpp$(PreprocessSuffix) src/pickup.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

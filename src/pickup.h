@@ -4,10 +4,25 @@
 #include <core.h>
 #include <serializeddata.h>
 
+#include <render/render.h>
+
 namespace Core {
     class RenderComponent;
     class ArmatureComponent;
     class TriggerComponent;
+    
+    class PickupWorkaroundComponent : public EntityComponent {
+    public:
+        PickupWorkaroundComponent() : model(this){}
+        void Init(){ is_ready = true; if (resources_waiting == 0) Start(); }
+        void Uninit(){ is_ready = false; }
+        void Start();
+        void MakeWorkaround(name_t model, ArmatureComponent* armcomp);
+        void EventHandler(Event &event){}
+    protected:
+        ResourceProxy<Render::Model> model;
+        ArmatureComponent* armcomp = nullptr;
+    };
     
     class Pickup : public Entity {
     public:
@@ -58,6 +73,7 @@ namespace Core {
         RenderComponent* rendercomponent;
         ArmatureComponent* armaturecomponent;
         TriggerComponent* triggercomponent;
+        PickupWorkaroundComponent* workaroundcomponent;
     };
 }
 

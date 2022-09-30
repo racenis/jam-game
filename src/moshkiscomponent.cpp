@@ -110,6 +110,7 @@ void MoshkisComponent::UpdateMoshkis() {
             auto raycast_result = Physics::Raycast(moshkis_location, player_location);
             if (glm::dot(moshkis_front, moshkis_to_player) > 0.2f && raycast_result && raycast_result->GetParent() && raycast_result->GetParent()->GetName() == UID("player")) {
                 std::cout << "HIT!" << std::endl;
+                PlayerGotHitInFace(100);
             } else {
                 std::cout << "MISS!" << std::endl;
             }

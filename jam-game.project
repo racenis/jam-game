@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="jam-game" Version="11000" InternalType="Console">
   <VirtualDirectory Name="src">
+    <File Name="src/sound_fx.cpp"/>
     <File Name="src/pickup.h"/>
     <File Name="src/pickup.cpp"/>
     <File Name="src/jamgame.h"/>

@@ -87,6 +87,7 @@ void MoshkisComponent::UpdateMoshkis() {
         } else if (glm::distance(player_location, moshkis_location) < 1.5f) {
             moshkis_state = MOSHKIS_ATTACK;
             attack_frames = 0;
+            PlaySoundEffect(SOUND_MOSHKIS_ATTACK, moshkis_location);
             armcomp->StopAnimation(UID("MoshkisWalk"));
             armcomp->PlayAnimation(UID("MoshkisAttack"), 1, 1.0f, 2.0f);
         } else {
@@ -110,6 +111,7 @@ void MoshkisComponent::UpdateMoshkis() {
             auto raycast_result = Physics::Raycast(moshkis_location, player_location);
             if (glm::dot(moshkis_front, moshkis_to_player) > 0.2f && raycast_result && raycast_result->GetParent() && raycast_result->GetParent()->GetName() == UID("player")) {
                 std::cout << "HIT!" << std::endl;
+                PlaySoundEffect(SOUND_MOSHKIS_HIT, Render::CAMERA_POSITION);
                 PlayerGotHitInFace(100);
             } else {
                 std::cout << "MISS!" << std::endl;

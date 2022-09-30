@@ -97,6 +97,8 @@ public:
                 viewmodel_animator->StopAnimation(UID("RifleIdle"));
                 viewmodel_animator->PlayAnimation(UID("RifleFire"), 1, 1.0f, 1.0f);
                 
+                PlaySoundEffect(SOUND_RIFLE_FIRE, Render::CAMERA_POSITION);
+                
                 auto result = Physics::Raycast(Render::CAMERA_POSITION, Render::CAMERA_POSITION + ((Render::CAMERA_ROTATION * Render::CAMERA_FORWARD)) * 100.0f);
                 if (result && result->GetParent()) {
                     auto target_ent = result->GetParent();
@@ -111,6 +113,8 @@ public:
             } else if (player_state == PLAYER_STAPLER_IDLING && stapler_ammo) {
                 viewmodel_animator->StopAnimation(UID("StaplerIdle"));
                 viewmodel_animator->PlayAnimation(UID("StaplerFire"), 1, 1.0f, 1.0f);
+                
+                PlaySoundEffect(SOUND_STAPLER_FIRE, Render::CAMERA_POSITION);
             
                 auto result = Physics::Raycast(Render::CAMERA_POSITION, Render::CAMERA_POSITION + ((Render::CAMERA_ROTATION * Render::CAMERA_FORWARD)) * 100.0f);
                 if (result && result->GetParent()) {
@@ -120,6 +124,7 @@ public:
                         if (damage > 0.0f) {
                             Message msg {.type = Message::ACTIVATE, .data = (void*)((uint64_t)(damage))};
                             target_ent->MessageHandler(msg);
+                            PlaySoundEffect(SOUND_MOSHKIS_POP, Render::CAMERA_POSITION);
                         }
                         
                         std::cout << "HIT MOSHKIS!" <<std::endl;
@@ -197,6 +202,8 @@ void PlayerPickedUpPickup(Core::name_t pickup_model) {
     if (pickup_model == UID("items/pickups_lifeparticle")) main_player_stuff->player_health += 150;
     if (pickup_model == UID("items/pickups_rifle")) main_player_stuff->rifle_ammo += 5;
     if (pickup_model == UID("items/pickups_stapler")) main_player_stuff->stapler_ammo += 20;
+    
+    PlaySoundEffect(SOUND_PICKUP_PICKUP, Render::CAMERA_POSITION);
 }
 
 void PlayerGotHitInFace(uint64_t oof_size) {
@@ -238,6 +245,8 @@ int main() {
     
     Animation pisckup_animations (UID("items/pickups"));
     pisckup_animations.LoadFromDisk();
+    
+    LoadSoundEffects();
     
     // adding references to viewmodels, so that they get loaded first
     Model::Find(UID("items/viewmodel_aamuris"))->AddRef();
@@ -294,6 +303,7 @@ int main() {
     Player player;
     //player.SetLocation(37.0f, 1.0f, -22.0f); // in the exit of dungeon1
     player.SetLocation(0.0f, 8.5f, -15.5f); // in the start of dungeon1
+    //player.SetLocation(0.0f, 0.0f, 0.0f);
     player.Load();
     main_player = &player;
 
@@ -326,9 +336,7 @@ int main() {
         playerstuff.Update();
         
         for (auto& comp : PoolProxy<MoshkisComponent>::GetPool()) comp.UpdateMoshkis();
-        
-        
-        
+
         
         
         

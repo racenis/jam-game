@@ -18,6 +18,7 @@ namespace Core {
         if (!isloaded) return;
         rendercomponent->UpdateLocation(location);
         rendercomponent->UpdateRotation(rotation);
+        rendercomponent->SetCellParams(cell->HasInteriorLighting());
     }
     
     void Moshkis::SetParameters() {

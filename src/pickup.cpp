@@ -47,6 +47,7 @@ namespace Core {
         if (data->pickup_type == 0) rendercomponent->SetModel(UID("items/pickups_lifeparticle"));
         if (data->pickup_type == 1) rendercomponent->SetModel(UID("items/pickups_rifle"));
         if (data->pickup_type == 2) rendercomponent->SetModel(UID("items/pickups_stapler"));
+        rendercomponent->SetCellParams(cell->HasInteriorLighting());
         rendercomponent->SetPose(nullptr);
         
         armaturecomponent = PoolProxy<ArmatureComponent>::New();

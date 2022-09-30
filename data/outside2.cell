@@ -1,6 +1,6 @@
 # cell 0 0
-staticwobj outside2worldspawn 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 none maps/outside2 fullbright
-staticwobj outside2bworldspawn 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 none maps/outside2b fullbright
+staticwobj outside2worldspawn 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 none maps/outside2 maps/outside2
+staticwobj outside2bworldspawn 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 none maps/outside2b maps/outside2
 moshkis moshkis4 7.800000 -0.510000 15.790000 -3.141593 0.388407 -3.141593 none 420
 moshkis moshkis5 41.580002 0.200000 54.610001 0.000000 -0.000000 0.000000 none 420
 moshkis moshkis6 25.040001 19.269999 31.920004 -3.141593 -0.941593 -3.141593 none 420

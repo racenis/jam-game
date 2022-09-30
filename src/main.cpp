@@ -12,6 +12,7 @@
 
 #include <entities/crate.h>
 #include <entities/staticworldobject.h>
+#include <entities/lamp.h>
 #include <entities/player.h>
 #include "moshkis.h"
 #include "pickup.h"
@@ -61,6 +62,8 @@ public:
         
         viewmodel->UpdateLocation(Render::CAMERA_POSITION - glm::vec3(0.0f, 0.35f, 0.0f));
         viewmodel->UpdateRotation(Render::CAMERA_ROTATION);
+        auto cell = WorldCell::Find(Render::CAMERA_POSITION);
+        if (cell) viewmodel->SetCellParams(cell->HasInteriorLighting());
         
         ticks_since_oof++;
         
@@ -208,6 +211,7 @@ int main() {
 
     Entity::Register("staticwobj", [](std::string_view& params) -> Entity* {return new StaticWorldObject(params);});
     Entity::Register("crate", [](std::string_view& params) -> Entity* {return new Crate(params);});
+    Entity::Register("lamp", [](std::string_view& params) -> Entity* {return new Lamp(params);});
     Entity::Register("moshkis", [](std::string_view& params) -> Entity* {return new Moshkis(params);});
     Entity::Register("pickup", [](std::string_view& params) -> Entity* {return new Pickup(params);});
 
@@ -271,11 +275,11 @@ int main() {
     
     outside1->SetInterior(false); outside1->SetInteriorLights(false);
     outside2->SetInterior(false); outside2->SetInteriorLights(false);
-    factory1->SetInterior(true); factory1->SetInteriorLights(false);
-    factory2->SetInterior(true); factory2->SetInteriorLights(false);
-    dungeon1->SetInterior(true); dungeon1->SetInteriorLights(false);
-    dungeon2->SetInterior(true); dungeon2->SetInteriorLights(false);
-    minima->SetInterior(true); minima->SetInteriorLights(false);
+    factory1->SetInterior(true); factory1->SetInteriorLights(true);
+    factory2->SetInterior(true); factory2->SetInteriorLights(true);
+    dungeon1->SetInterior(true); dungeon1->SetInteriorLights(true);
+    dungeon2->SetInterior(true); dungeon2->SetInteriorLights(true);
+    minima->SetInterior(true); minima->SetInteriorLights(true);
     
     outside1->AddLink(outside2);
     outside1->AddLink(dungeon1);

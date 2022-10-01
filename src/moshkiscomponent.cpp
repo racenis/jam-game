@@ -66,9 +66,6 @@ void MoshkisComponent::UpdateMoshkis() {
             auto moshkis_to_player = glm::normalize(player_location - moshkis_location);
             auto moshkis_front = glm::normalize(moshkis_rotation * glm::vec3(0.0f, 0.0f, -1.0f));
             
-            Render::AddLine(moshkis_location, moshkis_location + moshkis_front, Render::COLOR_BLUE);
-            
-            
             auto raycast_result = Physics::Raycast(moshkis_location, player_location);
             
             if (glm::dot(moshkis_front, moshkis_to_player) > 0.2f && raycast_result && raycast_result->GetParent() && raycast_result->GetParent()->GetName() == UID("player")) {

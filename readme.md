@@ -1,9 +1,11 @@
-# -- Dzīvības Partikula --
+# Dzīvības Partikula
 This game was made for the "Alternative Engine Game Jam"
 
-Source code for the engine is on the [github}(https://github.com/racenis/tram-sdk).
+Source code for the engine is on the [github](https://github.com/racenis/tram-sdk).
 
-If you don't want to compile it yourself, then binaries for windows are on the --insert link here--.
+Assets are self-made, if not [mentioned otherwise](assetsources.md).
+
+If you don't want to compile it yourself, then binaries for windows are on the [itch.io](https://racenis.itch.io/dziiviibas-partikula).
 
 ## Compiling
 ### Compiler
@@ -16,4 +18,4 @@ Acquire the libraries and follow their installation instructions.
 Then you can compile the game itself. If you use Codelite IDE, then there's a project file for that, otherwise just compile all of the .cpp files. When linking on windows use the parameters ``-lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath -lglfw3 -lOpenAL32.dll -lglfw3 -lgdi32 -lopengl32`` (at least that's the order that works for me). For Linux you'll need use ``-lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath -lglfw3 -lopenal -lglfw3`` or something similar. If it doens't work then just experiment with it, but make sure that the Bullet physics (the first 4) flags are in the same order, otherwise it will not work.
 
 ## Editor
-If you want to try using the level editor, then you can get it on github [??? moš nē?]. To compile, it you'll need the wxWidgets library, and it takes a very long time to compile it. It should also be available as a Linux package. When compiling it, you'll only need wxWidgets, glad and stb_image libraries.
+If you want to try using the level editor, then it comes with the windows binaries. To compile, it you'll need the wxWidgets library, and it takes a very long time to compile it. It should also be available as a Linux package. When compiling it, you'll only need wxWidgets, glad and stb_image libraries.

@@ -1,3 +1,5 @@
+// This file contains random function and global variable definitions.
+
 #ifndef JAMGAME_H
 #define JAMGAME_H
 
@@ -19,6 +21,7 @@ enum soundeffect {
     SOUND_MOSHKIS_ATTACK,
     SOUND_RIFLE_FIRE,
     SOUND_STAPLER_FIRE,
+    SOUND_PICKUP_CLICK,
     SOUND_PICKUP_PICKUP,
     SOUND_LAST_SOUND
 };

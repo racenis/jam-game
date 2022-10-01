@@ -14,7 +14,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Poga
-Date                   :=01/10/2022
+Date                   :=02/10/2022
 CodeLitePath           :="C:/Program Files/CodeLite"
 MakeDirCommand         :=mkdir
 LinkerName             :=C:/mingw64/bin/g++.exe
@@ -66,7 +66,7 @@ AS       := C:/mingw64/bin/as.exe
 CodeLiteDir:=C:\Program Files\CodeLite
 WXWIN:=C:\Users\Poga\Desktop\miskaste\wxwidgets
 WXCFG:=gcc_dll\mswu
-Objects0=$(IntermediateDirectory)/src_sound_fx.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_moshkis.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_moshkiscomponent.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_main.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_pickup.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/src_moshkis.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_moshkiscomponent.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_main.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_pickup.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_sound_fx.cpp$(ObjectSuffix) 
 
 
 
@@ -97,22 +97,6 @@ PreBuild:
 ##
 ## Objects
 ##
-$(IntermediateDirectory)/src_sound_fx.cpp$(ObjectSuffix): src/sound_fx.cpp $(IntermediateDirectory)/src_sound_fx.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/Poga/Desktop/painis/jam-game/src/sound_fx.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_sound_fx.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/src_sound_fx.cpp$(DependSuffix): src/sound_fx.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/src_sound_fx.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/src_sound_fx.cpp$(DependSuffix) -MM src/sound_fx.cpp
-
-$(IntermediateDirectory)/src_sound_fx.cpp$(PreprocessSuffix): src/sound_fx.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_sound_fx.cpp$(PreprocessSuffix) src/sound_fx.cpp
-
-$(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix): src/tram-sdk.cpp $(IntermediateDirectory)/src_tram-sdk.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/Poga/Desktop/painis/jam-game/src/tram-sdk.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/src_tram-sdk.cpp$(DependSuffix): src/tram-sdk.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/src_tram-sdk.cpp$(DependSuffix) -MM src/tram-sdk.cpp
-
-$(IntermediateDirectory)/src_tram-sdk.cpp$(PreprocessSuffix): src/tram-sdk.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_tram-sdk.cpp$(PreprocessSuffix) src/tram-sdk.cpp
-
 $(IntermediateDirectory)/src_moshkis.cpp$(ObjectSuffix): src/moshkis.cpp $(IntermediateDirectory)/src_moshkis.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/Poga/Desktop/painis/jam-game/src/moshkis.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_moshkis.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/src_moshkis.cpp$(DependSuffix): src/moshkis.cpp
@@ -144,6 +128,22 @@ $(IntermediateDirectory)/src_pickup.cpp$(DependSuffix): src/pickup.cpp
 
 $(IntermediateDirectory)/src_pickup.cpp$(PreprocessSuffix): src/pickup.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_pickup.cpp$(PreprocessSuffix) src/pickup.cpp
+
+$(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix): src/tram-sdk.cpp $(IntermediateDirectory)/src_tram-sdk.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/Poga/Desktop/painis/jam-game/src/tram-sdk.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/src_tram-sdk.cpp$(DependSuffix): src/tram-sdk.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/src_tram-sdk.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/src_tram-sdk.cpp$(DependSuffix) -MM src/tram-sdk.cpp
+
+$(IntermediateDirectory)/src_tram-sdk.cpp$(PreprocessSuffix): src/tram-sdk.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_tram-sdk.cpp$(PreprocessSuffix) src/tram-sdk.cpp
+
+$(IntermediateDirectory)/src_sound_fx.cpp$(ObjectSuffix): src/sound_fx.cpp $(IntermediateDirectory)/src_sound_fx.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "C:/Users/Poga/Desktop/painis/jam-game/src/sound_fx.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_sound_fx.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/src_sound_fx.cpp$(DependSuffix): src/sound_fx.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/src_sound_fx.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/src_sound_fx.cpp$(DependSuffix) -MM src/sound_fx.cpp
+
+$(IntermediateDirectory)/src_sound_fx.cpp$(PreprocessSuffix): src/sound_fx.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_sound_fx.cpp$(PreprocessSuffix) src/sound_fx.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

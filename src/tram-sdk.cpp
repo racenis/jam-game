@@ -1,4 +1,5 @@
-// the propery way would be to compile the engine as a static library
+// the proper way would be to compile the engine as a static library
+// but this is easier
 
 #include <async.cpp>
 #include <audio.cpp>

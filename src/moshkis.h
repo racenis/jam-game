@@ -1,3 +1,5 @@
+// This file contains the declaration of the monster creature.
+
 #ifndef MOSHKIS_H
 #define MOSHKIS_H
 

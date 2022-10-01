@@ -1,3 +1,5 @@
+// This file contains the implementation of the monster creature.
+
 #include <components/rendercomponent.h>
 #include <components/physicscomponent.h>
 #include <components/armaturecomponent.h>

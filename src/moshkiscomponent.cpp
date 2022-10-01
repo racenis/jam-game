@@ -1,3 +1,5 @@
+// This file contains the implementation of the monster creature behaviour.
+
 #include <components/physicscomponent.h>
 #include <components/armaturecomponent.h>
 #include <entities/player.h>
@@ -14,16 +16,6 @@ void MoshkisComponent::Init() {
     assert(armcomp);
 }
 
-void MoshkisComponent::Uninit() {
-    
-    
-}
-
-void MoshkisComponent::Start() {
-    
-    
-}
-
 void MoshkisComponent::OofMoshkis(uint64_t oof_strength) {
     if (oof_strength > moshkis_health) {
         moshkis_health = 0;
@@ -31,11 +23,11 @@ void MoshkisComponent::OofMoshkis(uint64_t oof_strength) {
         moshkis_health = moshkis_health - oof_strength;
     }
     
-    std::cout << "Moshkis oof: " << oof_strength << " New health: " << moshkis_health;
-    
     if (moshkis_health == 0) {
         moshkis_state = MOSHKIS_DEAD;
         
+        // this makes is that the monster creature entity is deleted
+        // when the part of the level it is in gets unloaded
         parent->SetPersistent(false);
         
         if (armcomp->IsPlayingAnimation(UID("MoshkisIdle"))) armcomp->StopAnimation(UID("MoshkisIdle"));
@@ -43,6 +35,8 @@ void MoshkisComponent::OofMoshkis(uint64_t oof_strength) {
         if (armcomp->IsPlayingAnimation(UID("MoshkisAttack"))) armcomp->StopAnimation(UID("MoshkisAttack"));
         
         armcomp->PlayAnimation(UID("MoshkisDie"), 1, 1.0f, 1.0f, true, true);
+    } else {
+        armcomp->PlayAnimation(UID("MoshkisFlinch"), 1, 1.0f, 1.0f);
     }
 }
 
@@ -107,11 +101,8 @@ void MoshkisComponent::UpdateMoshkis() {
             auto moshkis_front = glm::normalize(moshkis_rotation * glm::vec3(0.0f, 0.0f, -1.0f));
             auto raycast_result = Physics::Raycast(moshkis_location, player_location);
             if (glm::dot(moshkis_front, moshkis_to_player) > 0.2f && raycast_result && raycast_result->GetParent() && raycast_result->GetParent()->GetName() == UID("player")) {
-                std::cout << "HIT!" << std::endl;
                 PlaySoundEffect(SOUND_MOSHKIS_HIT, Render::CAMERA_POSITION);
                 PlayerGotHitInFace(100);
-            } else {
-                std::cout << "MISS!" << std::endl;
             }
         }
         

@@ -1,3 +1,5 @@
+// This file contains the implementation of the pickup item entity.
+
 #include <components/rendercomponent.h>
 #include <components/triggercomponent.h>
 #include <components/armaturecomponent.h>
@@ -43,17 +45,18 @@ namespace Core {
     void Pickup::Load(){
         auto data = (Data*) serialized_data;
 
+        name_t pickup_model = 0;
+        pickup_model = data->pickup_type == 0 ? UID("items/pickups_lifeparticle") : pickup_model;
+        pickup_model = data->pickup_type == 1 ? UID("items/pickups_rifle") : pickup_model;
+        pickup_model = data->pickup_type == 2 ? UID("items/pickups_stapler") : pickup_model;
+
         rendercomponent = PoolProxy<RenderComponent>::New();
-        if (data->pickup_type == 0) rendercomponent->SetModel(UID("items/pickups_lifeparticle"));
-        if (data->pickup_type == 1) rendercomponent->SetModel(UID("items/pickups_rifle"));
-        if (data->pickup_type == 2) rendercomponent->SetModel(UID("items/pickups_stapler"));
+        rendercomponent->SetModel(pickup_model);
         rendercomponent->SetCellParams(cell->HasInteriorLighting());
         rendercomponent->SetPose(nullptr);
         
         armaturecomponent = PoolProxy<ArmatureComponent>::New();
-        if (data->pickup_type == 0) armaturecomponent->SetModel(UID("items/pickups_lifeparticle"));
-        if (data->pickup_type == 1) armaturecomponent->SetModel(UID("items/pickups_rifle"));
-        if (data->pickup_type == 2) armaturecomponent->SetModel(UID("items/pickups_stapler"));
+        armaturecomponent->SetModel(pickup_model);
 
         triggercomponent = PoolProxy<TriggerComponent>::New();
         triggercomponent->SetLocation(location);
@@ -73,9 +76,7 @@ namespace Core {
         rendercomponent->SetPose(armaturecomponent->GetPosePtr());
         
         workaroundcomponent = PoolProxy<PickupWorkaroundComponent>::New();
-        if (data->pickup_type == 0) workaroundcomponent->MakeWorkaround(UID("items/pickups_lifeparticle"), armaturecomponent);
-        if (data->pickup_type == 1) workaroundcomponent->MakeWorkaround(UID("items/pickups_rifle"), armaturecomponent);
-        if (data->pickup_type == 2) workaroundcomponent->MakeWorkaround(UID("items/pickups_stapler"), armaturecomponent);
+        workaroundcomponent->MakeWorkaround(pickup_model, armaturecomponent);
         workaroundcomponent->Init();
         
         isloaded = true;

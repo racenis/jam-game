@@ -1,3 +1,5 @@
+// This file contains the declaration of the monster creature behaviour.
+
 #ifndef MOSHKISCOMPONENT_H
 #define MOSHKISCOMPONENT_H
 
@@ -10,9 +12,9 @@ namespace Core {
     class MoshkisComponent : public EntityComponent {
     public:
         void Init();
-        void Uninit();
-        void Start();
-        void EventHandler(Event &event){};
+        void Uninit(){}
+        void Start(){}
+        void EventHandler(Event &event){}
         
         void UpdateMoshkis();
         
@@ -30,7 +32,7 @@ namespace Core {
         ArmatureComponent* armcomp = nullptr;
         
         uint64_t moshkis_health;
-        bool rotation_disabled = false; // a hack, because the physicscomponent isn't 100% done yet
+        bool rotation_disabled = false; // a hack, because the physicscomponent is kinda dumb
         
         enum {
             MOSHKIS_IDLE,

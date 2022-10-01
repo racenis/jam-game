@@ -1,3 +1,5 @@
+// This file contains the declaration of the pickup item entity.
+
 #ifndef PICKUP_H
 #define PICKUP_H
 
@@ -11,6 +13,11 @@ namespace Core {
     class ArmatureComponent;
     class TriggerComponent;
     
+    // the way the animation system is implemented right now, if you
+    // start an animation before the model that the animation is
+    // played on isn't loaded, the animation will not play.
+    // this component will wait for the model to load and then start
+    // the animation.
     class PickupWorkaroundComponent : public EntityComponent {
     public:
         PickupWorkaroundComponent() : model(this){}

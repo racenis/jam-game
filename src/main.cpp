@@ -1,3 +1,5 @@
+// This file contains main() function and a big chunk of gameplay logic code.
+
 #include <iostream>
 
 #include <core.h>
@@ -19,13 +21,13 @@
 
 #include <components/rendercomponent.h>
 #include <components/armaturecomponent.h>
-#include <components/lightcomponent.h>
+//#include <components/lightcomponent.h>
 
 #include <components/triggercomponent.h>
 #include <components/audiocomponent.h>
 
 #include <components/controllercomponent.h>
-#include <components/physicscomponent.h>
+//#include <components/physicscomponent.h>
 
 #include "moshkiscomponent.h"
 
@@ -35,10 +37,15 @@ using namespace Core;
 using namespace Core::Render;
 using namespace Core::UI;
 
+// definition of the global variable declaration in jamgame.h
 Player* main_player = nullptr;
 
+// set to true when player reaches the end of the final dungeon,
+// so that congratulatory message can be displayed
 bool is_finished = false;
 
+// this class keeps track of the player's health, ammunition count,
+// as well as the viewmodels and their animations
 class PlayerStuff {
 public:
     PlayerStuff (Player* player) {
@@ -93,48 +100,59 @@ public:
             player_state = PLAYER_STAPLER_IDLING;
         }
         
+        // if left mouse button is clicked
         if (UI::ismouse_left) {
             if (player_state == PLAYER_RIFLE_IDLING && rifle_ammo) {
                 viewmodel_animator->StopAnimation(UID("RifleIdle"));
-                viewmodel_animator->PlayAnimation(UID("RifleFire"), 1, 1.0f, 1.0f);
+                viewmodel_animator->PlayAnimation(UID("RifleFire"), 1, 1.0f, 1.2f);
                 
                 PlaySoundEffect(SOUND_RIFLE_FIRE, Render::CAMERA_POSITION);
                 
                 auto result = Physics::Raycast(Render::CAMERA_POSITION, Render::CAMERA_POSITION + ((Render::CAMERA_ROTATION * Render::CAMERA_FORWARD)) * 100.0f);
+                
                 if (result && result->GetParent()) {
                     auto target_ent = result->GetParent();
+                    
                     if (typeid(*target_ent) == typeid(Moshkis)) {
+                        // notice how we're type-punning the data pointer into an integer.
+                        // there's no real benefit to doing it this way, I just felt like
+                        // avoiding a memory allocation
                         Message msg {.type = Message::ACTIVATE, .data = (void*)500};
                         target_ent->MessageHandler(msg);
-                        std::cout << "HIT MOSHKIS!" <<std::endl;
                     }
                 }
+                
                 rifle_ammo--;
                 player_state = PLAYER_RIFLE_FIRING;
             } else if (player_state == PLAYER_STAPLER_IDLING && stapler_ammo) {
                 viewmodel_animator->StopAnimation(UID("StaplerIdle"));
-                viewmodel_animator->PlayAnimation(UID("StaplerFire"), 1, 1.0f, 1.0f);
+                viewmodel_animator->PlayAnimation(UID("StaplerFire"), 1, 1.0f, 2.0f);
                 
                 PlaySoundEffect(SOUND_STAPLER_FIRE, Render::CAMERA_POSITION);
             
                 auto result = Physics::Raycast(Render::CAMERA_POSITION, Render::CAMERA_POSITION + ((Render::CAMERA_ROTATION * Render::CAMERA_FORWARD)) * 100.0f);
+                
                 if (result && result->GetParent()) {
                     auto target_ent = result->GetParent();
+                    
                     if (typeid(*target_ent) == typeid(Moshkis)) {
+                        // linear drop-off, from 350 damage when shooting right into the monster's face,
+                        // decreasing by 50 damage for every meter and stopping at 0 after 7 meters
                         float damage = 50.0f * (7.0f - glm::distance(player->GetLocation(), target_ent->GetLocation()));
+                        
+                        // if you don't check for negative damage, then shooting at distances over 7 meters
+                        // would give health to the monster, instead of damaging it
                         if (damage > 0.0f) {
                             Message msg {.type = Message::ACTIVATE, .data = (void*)((uint64_t)(damage))};
                             target_ent->MessageHandler(msg);
                             PlaySoundEffect(SOUND_MOSHKIS_POP, Render::CAMERA_POSITION);
                         }
-                        
-                        std::cout << "HIT MOSHKIS!" <<std::endl;
                     }
                 }
                 stapler_ammo--;
                 player_state = PLAYER_STAPLER_FIRING;
             } else {
-                std::cout << "player is already firing or out of ammo" << std::endl;
+                PlaySoundEffect(SOUND_PICKUP_CLICK, Render::CAMERA_POSITION);
             }
         }
     }
@@ -147,13 +165,13 @@ public:
         } else if (player_state == PLAYER_STAPLER_IDLING) {
             viewmodel_animator->StopAnimation(UID("StaplerIdle"));
         } else {
-            std::cout << "player is firing, so can't switch" << std::endl;
+            PlaySoundEffect(SOUND_PICKUP_CLICK, Render::CAMERA_POSITION);
             return;
         }
         
         
         // if you don't restart the components, then the models won't get updated
-        // kinda dumb, but will fix later sometime
+        // not sure if that's an error, or bad design on my part
         viewmodel->Uninit();
         viewmodel_animator->Uninit();
         
@@ -161,12 +179,10 @@ public:
             viewmodel->SetModel(UID("items/viewmodel_rifle"));
             viewmodel_animator->SetModel(UID("items/viewmodel_rifle"));
             player_state = PLAYER_RIFLE_IDLING;
-            std::cout << "switched player to stapler" << std::endl;
         } else if (player_state == PLAYER_RIFLE_IDLING) {
             viewmodel->SetModel(UID("items/viewmodel_stapler"));
             viewmodel_animator->SetModel(UID("items/viewmodel_stapler"));
             player_state = PLAYER_STAPLER_IDLING;
-            std::cout << "switched player to stapler" << std::endl;
         }
         
         viewmodel->Init();
@@ -197,9 +213,8 @@ public:
 
 PlayerStuff* main_player_stuff = nullptr;
 
+// this is called by the pickup entity when the player walks into it
 void PlayerPickedUpPickup(Core::name_t pickup_model) {
-    std::cout << "PICKED UP " << ReverseUID(pickup_model) << std::endl;
-    
     if (pickup_model == UID("items/pickups_lifeparticle")) main_player_stuff->player_health += 150;
     if (pickup_model == UID("items/pickups_rifle")) main_player_stuff->rifle_ammo += 5;
     if (pickup_model == UID("items/pickups_stapler")) main_player_stuff->stapler_ammo += 20;
@@ -207,22 +222,23 @@ void PlayerPickedUpPickup(Core::name_t pickup_model) {
     PlaySoundEffect(SOUND_PICKUP_PICKUP, Render::CAMERA_POSITION);
 }
 
+// this is called by the monster entity when it successfully hits the player
 void PlayerGotHitInFace(uint64_t oof_size) {
-    std::cout << "GOT HIT IN FACE " << oof_size << std::endl;
-    
     main_player_stuff->ticks_since_oof = 0;
     main_player_stuff->player_health -= oof_size;
 }
 
 int main() {
-    std::cout << "Dziiviibas Partikula v0.1-alpha" << std::endl;
+    std::cout << "Dziiviibas Partikula v0.5" << std::endl;
 
+    // registering in all of the entities, so that they can be loaded from the level file
     Entity::Register("staticwobj", [](std::string_view& params) -> Entity* {return new StaticWorldObject(params);});
     Entity::Register("crate", [](std::string_view& params) -> Entity* {return new Crate(params);});
     Entity::Register("lamp", [](std::string_view& params) -> Entity* {return new Lamp(params);});
     Entity::Register("moshkis", [](std::string_view& params) -> Entity* {return new Moshkis(params);});
     Entity::Register("pickup", [](std::string_view& params) -> Entity* {return new Pickup(params);});
 
+    // initialization of the systems that we'll be using
     Core::Init();
     UI::Init();
     Physics::InitPhysics();
@@ -234,31 +250,32 @@ int main() {
     Material::SetErrorMaterial(new Material(UID("defaulttexture"), Material::TEXTURE));
     Model::SetErrorModel(new Model(UID("errorstatic")));
 
+    // all of the text for this game is stored in the executable, but
+    // if you don't load a language file, then some parts of the engine
+    // will glitch out for some reason
     LoadText("data/lv.lang");
 
+    // load up all of the material (texture) definitions
     Material::LoadMaterialInfo("data/texture.list");
     
+    // loading up all of the animations
     Animation monster_animations (UID("creatures/moshkis"));
-    monster_animations.LoadFromDisk();
-    
     Animation viewmodel_animations (UID("items/viewmodels"));
-    viewmodel_animations.LoadFromDisk();
-    
     Animation pisckup_animations (UID("items/pickups"));
+    
+    viewmodel_animations.LoadFromDisk();
+    monster_animations.LoadFromDisk();
     pisckup_animations.LoadFromDisk();
     
+    // loading up all of the audio files
     LoadSoundEffects();
     
-    // adding references to viewmodels, so that they get loaded first
-    Model::Find(UID("items/viewmodel_aamuris"))->AddRef();
-    Model::Find(UID("items/viewmodel_rifle"))->AddRef();
-    Model::Find(UID("items/viewmodel_stapler"))->AddRef();
+    // pre-loading viewmodels, so that there's no awkward pause when switching between them
+    Model::Find(UID("items/viewmodel_aamuris"))->AddRef(); Async::RequestResource(nullptr, Model::Find(UID("items/viewmodel_aamuris")));
+    Model::Find(UID("items/viewmodel_rifle"))->AddRef(); Async::RequestResource(nullptr, Model::Find(UID("items/viewmodel_rifle")));
+    Model::Find(UID("items/viewmodel_stapler"))->AddRef(); Async::RequestResource(nullptr, Model::Find(UID("items/viewmodel_stapler")));
     
-    // audios
-    Audio::Sound derp (UID("derp"));
-    //derp.LoadFromDisk();
-
-
+    // creating the parts of the level that will be streamed in
     WorldCell* outside1 = PoolProxy<WorldCell>::New();
     WorldCell* outside2 = PoolProxy<WorldCell>::New();
     WorldCell* factory1 = PoolProxy<WorldCell>::New();
@@ -267,6 +284,7 @@ int main() {
     WorldCell* dungeon2 = PoolProxy<WorldCell>::New();
     WorldCell* minima = PoolProxy<WorldCell>::New();
     
+    // self-explanatory
     outside1->SetName(UID("outside1"));
     outside2->SetName(UID("outside2"));
     factory1->SetName(UID("factory1"));
@@ -275,6 +293,7 @@ int main() {
     dungeon2->SetName(UID("dungeon2"));
     minima->SetName(UID("minima"));
     
+    // this loads the entity and transition definitions from the disk
     outside1->LoadFromDisk();
     outside2->LoadFromDisk();
     factory1->LoadFromDisk();
@@ -283,6 +302,8 @@ int main() {
     dungeon2->LoadFromDisk();
     minima->LoadFromDisk();
     
+    // SetInterior() is so that the transitions work properly
+    // SetInteriorLights() is so that objects inside interiors don't get lit by the sun
     outside1->SetInterior(false); outside1->SetInteriorLights(false);
     outside2->SetInterior(false); outside2->SetInteriorLights(false);
     factory1->SetInterior(true); factory1->SetInteriorLights(true);
@@ -291,6 +312,8 @@ int main() {
     dungeon2->SetInterior(true); dungeon2->SetInteriorLights(true);
     minima->SetInterior(true); minima->SetInteriorLights(true);
     
+    // adding links between parts of the level, so that the level loader
+    // understands in which part of the level you are inside of
     outside1->AddLink(outside2);
     outside1->AddLink(dungeon1);
     outside1->AddLink(minima);
@@ -304,7 +327,6 @@ int main() {
     Player player;
     //player.SetLocation(37.0f, 1.0f, -22.0f); // in the exit of dungeon1
     player.SetLocation(0.0f, 8.5f, -15.5f); // in the start of dungeon1
-    //player.SetLocation(0.0f, 0.0f, 0.0f);
     player.Load();
     main_player = &player;
 
@@ -312,9 +334,10 @@ int main() {
     main_player_stuff = &playerstuff;
 
     KeyActionBindings[GLFW_KEY_R]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ glm::vec3 ploc; main_player->GetLocation(ploc); ploc += glm::vec3(0.0f, 3.0f, 0.0f); main_player->SetLocation(ploc); }};
-    
     KeyActionBindings[GLFW_KEY_Q]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ main_player_stuff->SwitchWeapon(); }};
     
+    // ideally you would update the skybox's each frame, so that it is centered
+    // on the player, but whatever
     auto skybox = PoolProxy<RenderComponent>::New();
     skybox->SetLightmap(UID("fullbright"));
     skybox->SetCellParams(true);
@@ -323,6 +346,7 @@ int main() {
     skybox->SetModel(UID("skybox"));
     skybox->Init();
     
+    // this will get triggered when the player reaches the end of the last dungeon
     auto end_trigger = PoolProxy<TriggerComponent>::New();
     end_trigger->SetLocation(glm::vec3(-65.3f, -6.9f, 65.9f));
     end_trigger->SetRotation(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
@@ -334,6 +358,7 @@ int main() {
     while(!SHOULD_CLOSE){
         UI::Update();
 
+        // this makes the camera follow the player character
         if (UI::INPUT_STATE == STATE_DEFAULT) {
             player.GetLocation(Render::CAMERA_POSITION);
             player.GetLocation(Audio::LISTENER_POSITION);
@@ -343,22 +368,12 @@ int main() {
             Audio::LISTENER_ORIENTATION[1] = Render::CAMERA_UP;
         }
         
-        //time_of_day += 0.001f;
+        //time_of_day += 0.001f; // if you uncomment this, you get a basic day-night cycle
         SetSun(time_of_day); // this sets the ambient lighting
-
-
-        static int tick = 0;
-        tick++;
 
         playerstuff.Update();
         
         for (auto& comp : PoolProxy<MoshkisComponent>::GetPool()) comp.UpdateMoshkis();
-
-        
-        
-        
-        
-        
         
         GUI::Begin();
             GUI::DebugMenu();
@@ -366,15 +381,16 @@ int main() {
         
             GUI::Frame(Core::GUI::FRAME_BOTTOM, 50.0f);
                 char ammobuffer[100]; char healthbuffer[100];
-                if (playerstuff.player_state == PlayerStuff::PLAYER_STAPLER_IDLING || playerstuff.player_state == PlayerStuff::PLAYER_STAPLER_FIRING)
-                    sprintf(ammobuffer, "Ammunition: %d",  playerstuff.stapler_ammo);
-                else
-                    sprintf(ammobuffer, "Ammunition: %d",  playerstuff.rifle_ammo);
-                if (playerstuff.player_health > 0)
-                    sprintf(healthbuffer, "Health: %d", playerstuff.player_health);
-                else
-                    sprintf(healthbuffer, "YOURE DEAD: %d", playerstuff.player_health);
+                
+                bool player_using_stapler = playerstuff.player_state == PlayerStuff::PLAYER_STAPLER_IDLING || playerstuff.player_state == PlayerStuff::PLAYER_STAPLER_FIRING;
+                auto ammocount = player_using_stapler ? playerstuff.stapler_ammo : playerstuff.rifle_ammo;
+                sprintf(ammobuffer, "Ammunition: %d",  ammocount);
+                
+                auto healthtext = (playerstuff.player_health > 0) ? "Health: %d" : "YOURE DEAD: %d";
+                sprintf(healthbuffer, healthtext, playerstuff.player_health);
+                    
                 bool firing = playerstuff.player_state == PlayerStuff::PLAYER_RIFLE_FIRING || playerstuff.player_state == PlayerStuff::PLAYER_STAPLER_FIRING;
+                
                 GUI::Text(ammobuffer, 1, Core::GUI::TEXT_CENTER, firing ? COLOR_DISABLED : COLOR_WHITE); GUI::FrameBreakLine();
                 GUI::Text(healthbuffer, 1, Core::GUI::TEXT_CENTER, playerstuff.ticks_since_oof > 100 ? COLOR_WHITE : glm::vec3(1.0f, ((float)playerstuff.ticks_since_oof)/100.0f, ((float)playerstuff.ticks_since_oof)/100.0f));
             GUI::EndFrame();
@@ -389,7 +405,6 @@ int main() {
         
         Audio::Update();
         
-        // this loads the models and textures into video memory
         Async::ResourceLoader2ndStage();
         Async::FinishResource();
 
@@ -401,7 +416,6 @@ int main() {
         
         ControllerComponent::UpdateAll();
 
-        // updates the physics world
         float phys_step = 1.0f / 60.0f;
         Physics::StepPhysics(phys_step);
 

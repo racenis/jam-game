@@ -21,8 +21,7 @@
 #include <components/armaturecomponent.h>
 #include <components/lightcomponent.h>
 
-#include <components/spritecomponent.h>
-#include <components/particlecomponent.h>
+#include <components/triggercomponent.h>
 #include <components/audiocomponent.h>
 
 #include <components/controllercomponent.h>
@@ -37,6 +36,8 @@ using namespace Core::Render;
 using namespace Core::UI;
 
 Player* main_player = nullptr;
+
+bool is_finished = false;
 
 class PlayerStuff {
 public:
@@ -314,6 +315,22 @@ int main() {
     
     KeyActionBindings[GLFW_KEY_Q]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ main_player_stuff->SwitchWeapon(); }};
     
+    auto skybox = PoolProxy<RenderComponent>::New();
+    skybox->SetLightmap(UID("fullbright"));
+    skybox->SetCellParams(true);
+    skybox->UpdateLocation(glm::vec3(0.0f, 0.0f, 0.0f));
+    skybox->UpdateRotation(glm::quat(glm::vec3(0.0f, 3.14f, 0.0f)));
+    skybox->SetModel(UID("skybox"));
+    skybox->Init();
+    
+    auto end_trigger = PoolProxy<TriggerComponent>::New();
+    end_trigger->SetLocation(glm::vec3(-65.3f, -6.9f, 65.9f));
+    end_trigger->SetRotation(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
+    end_trigger->SetParent(nullptr);
+    end_trigger->SetModel(UID("box1meter"));
+    end_trigger->SetActivationCallback([](TriggerComponent* comp){ is_finished = true; });
+    end_trigger->SetFilterCallback([](TriggerComponent* trig, PhysicsComponent* comp){ return comp && comp->GetParent() && comp->GetParent()->GetName() == UID("player"); });
+    
     while(!SHOULD_CLOSE){
         UI::Update();
 
@@ -361,6 +378,13 @@ int main() {
                 GUI::Text(ammobuffer, 1, Core::GUI::TEXT_CENTER, firing ? COLOR_DISABLED : COLOR_WHITE); GUI::FrameBreakLine();
                 GUI::Text(healthbuffer, 1, Core::GUI::TEXT_CENTER, playerstuff.ticks_since_oof > 100 ? COLOR_WHITE : glm::vec3(1.0f, ((float)playerstuff.ticks_since_oof)/100.0f, ((float)playerstuff.ticks_since_oof)/100.0f));
             GUI::EndFrame();
+            
+            if (is_finished) {
+                GUI::Frame(Core::GUI::FRAME_BOTTOM, 100.0f);
+                GUI::Text("YOU ARE WINNER!", 1, Core::GUI::TEXT_CENTER, COLOR_GREEN);
+                GUI::EndFrame();
+            }
+            
         GUI::End();
         
         Audio::Update();

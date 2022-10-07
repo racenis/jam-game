@@ -14,7 +14,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Poga
-Date                   :=02/10/2022
+Date                   :=07/10/2022
 CodeLitePath           :="C:/Program Files/CodeLite"
 MakeDirCommand         :=mkdir
 LinkerName             :=C:/mingw64/bin/g++.exe
@@ -39,7 +39,7 @@ ObjectsFileList        :=$(IntermediateDirectory)/ObjectsList.txt
 PCHCompileFlags        :=
 RcCmpOptions           := 
 RcCompilerName         :=C:/mingw64/bin/windres.exe
-LinkOptions            :=  -lglfw3 -lgdi32 -lopengl32 -static-libgcc -static-libstdc++ -static
+LinkOptions            :=  -lglfw3 -lgdi32 -lopengl32 -static-libgcc -static-libstdc++ -static -pg
 IncludePath            :=  $(IncludeSwitch). $(IncludeSwitch). $(IncludeSwitch)../tram-sdk/src $(IncludeSwitch)../tram-sdk/libraries 
 IncludePCH             := 
 RcIncludePath          := 
@@ -54,7 +54,7 @@ LibPath                := $(LibraryPathSwitch). $(LibraryPathSwitch)../tram-sdk/
 AR       := C:/mingw64/bin/ar.exe rcu
 CXX      := C:/mingw64/bin/g++.exe
 CC       := C:/mingw64/bin/gcc.exe
-CXXFLAGS :=  -g -O0 -std=c++20 -Wall $(Preprocessors)
+CXXFLAGS :=  -g -O0 -std=c++20 -Wall -pg $(Preprocessors)
 CFLAGS   :=  -g -O0 -Wall $(Preprocessors)
 ASFLAGS  := 
 AS       := C:/mingw64/bin/as.exe

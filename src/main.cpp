@@ -37,6 +37,11 @@ using namespace Core;
 using namespace Core::Render;
 using namespace Core::UI;
 
+// forward declaration
+class PlayerStuff;
+
+PlayerStuff* main_player_stuff = nullptr;
+
 // definition of the global variable declaration in jamgame.h
 Player* main_player = nullptr;
 
@@ -63,6 +68,24 @@ public:
         viewmodel_animator->Init();
 
         viewmodel->SetPose(viewmodel_animator->GetPosePtr());
+        
+        viewmodel_animator->SetOnAnimationFinishCallback([](ArmatureComponent* comp, name_t name) {
+            main_player_stuff->AnimationStopped(name);
+        });
+    }
+    
+    void AnimationStopped(name_t animation) {
+        if (animation == UID("AamursFire")) {
+            player_state = PLAYER_HAMMER_IDLING;
+        } else if (animation == UID("RifleFire")) {
+            player_state = PLAYER_RIFLE_IDLING;
+        } else if (animation == UID("StaplerFire")) {
+            player_state = PLAYER_STAPLER_IDLING;
+        } else {
+            return;
+        }
+        
+        Update();
     }
     
     void Update() {
@@ -87,19 +110,6 @@ public:
             viewmodel_animator->PlayAnimation(UID("StaplerIdle"), -1, 1.0f, 1.0f);
         }
         
-        // it would probably be best if these were driven by events or something
-        if (player_state == PLAYER_HAMMER_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("AamursFire"))) {
-            player_state = PLAYER_HAMMER_IDLING;
-        }
-        
-        if (player_state == PLAYER_RIFLE_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("RifleFire"))) {
-            player_state = PLAYER_RIFLE_IDLING;
-        }
-        
-        if (player_state == PLAYER_STAPLER_FIRING && !viewmodel_animator->IsPlayingAnimation(UID("StaplerFire"))) {
-            player_state = PLAYER_STAPLER_IDLING;
-        }
-        
         // if left mouse button is clicked
         if (UI::ismouse_left) {
             if (player_state == PLAYER_RIFLE_IDLING && rifle_ammo) {
@@ -108,7 +118,7 @@ public:
                 
                 PlaySoundEffect(SOUND_RIFLE_FIRE, Render::CAMERA_POSITION);
                 
-                auto result = Physics::Raycast(Render::CAMERA_POSITION, Render::CAMERA_POSITION + ((Render::CAMERA_ROTATION * Render::CAMERA_FORWARD)) * 100.0f);
+                auto result = Physics::Raycast(Render::CAMERA_POSITION, Render::CAMERA_POSITION + ((Render::CAMERA_ROTATION * DIRECTION_FORWARD)) * 100.0f);
                 
                 if (result && result->GetParent()) {
                     auto target_ent = result->GetParent();
@@ -130,7 +140,7 @@ public:
                 
                 PlaySoundEffect(SOUND_STAPLER_FIRE, Render::CAMERA_POSITION);
             
-                auto result = Physics::Raycast(Render::CAMERA_POSITION, Render::CAMERA_POSITION + ((Render::CAMERA_ROTATION * Render::CAMERA_FORWARD)) * 100.0f);
+                auto result = Physics::Raycast(Render::CAMERA_POSITION, Render::CAMERA_POSITION + ((Render::CAMERA_ROTATION * DIRECTION_FORWARD)) * 100.0f);
                 
                 if (result && result->GetParent()) {
                     auto target_ent = result->GetParent();
@@ -211,8 +221,6 @@ public:
     uint32_t ticks_since_oof = 100;
 };
 
-PlayerStuff* main_player_stuff = nullptr;
-
 // this is called by the pickup entity when the player walks into it
 void PlayerPickedUpPickup(Core::name_t pickup_model) {
     if (pickup_model == UID("items/pickups_lifeparticle")) main_player_stuff->player_health += 150;
@@ -229,7 +237,7 @@ void PlayerGotHitInFace(uint64_t oof_size) {
 }
 
 int main() {
-    std::cout << "Dziiviibas Partikula v0.5" << std::endl;
+    std::cout << "Dziiviibas Partikula v1.1" << std::endl;
 
     // registering in all of the entities, so that they can be loaded from the level file
     Entity::Register("staticwobj", [](std::string_view& params) -> Entity* {return new StaticWorldObject(params);});
@@ -326,14 +334,14 @@ int main() {
     
     Player player;
     //player.SetLocation(37.0f, 1.0f, -22.0f); // in the exit of dungeon1
-    player.SetLocation(0.0f, 8.5f, -15.5f); // in the start of dungeon1
+    player.SetLocation(0.0f, 8.75f, -15.5f); // in the start of dungeon1
     player.Load();
     main_player = &player;
 
     PlayerStuff playerstuff(&player);
     main_player_stuff = &playerstuff;
 
-    KeyActionBindings[GLFW_KEY_R]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ glm::vec3 ploc; main_player->GetLocation(ploc); ploc += glm::vec3(0.0f, 3.0f, 0.0f); main_player->SetLocation(ploc); }};
+    KeyActionBindings[GLFW_KEY_R]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ main_player->SetLocation(0.0f, 8.75f, -15.5f); }};
     KeyActionBindings[GLFW_KEY_Q]  = KeyAction {.type = KeyAction::SPECIAL_OPTION, .special_option = [](){ main_player_stuff->SwitchWeapon(); }};
     
     // ideally you would update the skybox's each frame, so that it is centered
@@ -355,21 +363,22 @@ int main() {
     end_trigger->SetActivationCallback([](TriggerComponent* comp){ is_finished = true; });
     end_trigger->SetFilterCallback([](TriggerComponent* trig, PhysicsComponent* comp){ return comp && comp->GetParent() && comp->GetParent()->GetName() == UID("player"); });
     
+    Render::SUN_DIRECTION = glm::normalize(glm::vec3(0.0f, 1.0f, 0.5f));
+    Render::SUN_COLOR = glm::vec3(250.0f, 214.0f, 165.0f) / 256.0f * 0.8f;
+    Render::AMBIENT_COLOR = Render::SUN_COLOR * 0.7f;
+    
     while(!SHOULD_CLOSE){
         UI::Update();
 
         // this makes the camera follow the player character
         if (UI::INPUT_STATE == STATE_DEFAULT) {
-            player.GetLocation(Render::CAMERA_POSITION);
-            player.GetLocation(Audio::LISTENER_POSITION);
-            Render::CAMERA_POSITION += glm::vec3(0.0f, 0.5f, 0.0f);
-            Audio::LISTENER_POSITION += glm::vec3(0.0f, 0.5f, 0.0f);
-            Audio::LISTENER_ORIENTATION[0] = Render::CAMERA_ROTATION * Render::CAMERA_FORWARD;
-            Audio::LISTENER_ORIENTATION[1] = Render::CAMERA_UP;
+            glm::vec3 player_head;
+            player.GetLocation(player_head);
+            player_head += glm::vec3(0.0f, 0.5f, 0.0f);
+            Render::CAMERA_POSITION = player_head;
+            Audio::SetListenerPosition(player_head);
+            Audio::SetListenerOrientation(Render::CAMERA_ROTATION);
         }
-        
-        //time_of_day += 0.001f; // if you uncomment this, you get a basic day-night cycle
-        SetSun(time_of_day); // this sets the ambient lighting
 
         playerstuff.Update();
         

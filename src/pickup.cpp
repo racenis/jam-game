@@ -7,19 +7,6 @@
 #include "jamgame.h"
 
 namespace Core {
-    template <> Pool<PickupWorkaroundComponent> PoolProxy<PickupWorkaroundComponent>::pool("PickupWorkaroundComponent pool" , 50);
-    
-    void PickupWorkaroundComponent::Start() {
-        if (!is_ready) return;
-        assert(armcomp);
-        armcomp->PlayAnimation(UID("PickupSpin"), -1, 1.0f, 1.0f);
-    }
-    
-    void PickupWorkaroundComponent::MakeWorkaround(name_t model, ArmatureComponent* armcomp) {
-        this->armcomp = armcomp;
-        this->model.SetResource(Render::Model::Find(model));
-    }
-    
     Pickup::Pickup(std::string_view& str){
         Entity::SetParameters(str);
 
@@ -57,6 +44,7 @@ namespace Core {
         
         armaturecomponent = PoolProxy<ArmatureComponent>::New();
         armaturecomponent->SetModel(pickup_model);
+        armaturecomponent->PlayAnimation(UID("PickupSpin"), -1, 1.0f, 1.0f);
 
         triggercomponent = PoolProxy<TriggerComponent>::New();
         triggercomponent->SetLocation(location);
@@ -75,10 +63,6 @@ namespace Core {
         
         rendercomponent->SetPose(armaturecomponent->GetPosePtr());
         
-        workaroundcomponent = PoolProxy<PickupWorkaroundComponent>::New();
-        workaroundcomponent->MakeWorkaround(pickup_model, armaturecomponent);
-        workaroundcomponent->Init();
-        
         isloaded = true;
 
         UpdateParameters();
@@ -92,7 +76,6 @@ namespace Core {
         rendercomponent->Uninit();
         armaturecomponent->Uninit();
         triggercomponent->Uninit();
-        workaroundcomponent->Uninit();
 
         PoolProxy<RenderComponent>::Delete(rendercomponent);
         rendercomponent = nullptr;
@@ -100,9 +83,6 @@ namespace Core {
         armaturecomponent = nullptr;
         PoolProxy<TriggerComponent>::Delete(triggercomponent);
         triggercomponent = nullptr;
-        PoolProxy<PickupWorkaroundComponent>::Delete(workaroundcomponent);
-        workaroundcomponent = nullptr;
-
     }
 
     void Pickup::Serialize() {

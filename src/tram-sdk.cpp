@@ -12,6 +12,10 @@
 
 #include <components/controllercomponent.cpp>
 #include <components/entitycomponents.cpp>
+#include <components/rendercomponent.cpp>
+#include <components/armaturecomponent.cpp>
+#include <components/spritecomponent.cpp>
+#include <components/particlecomponent.cpp>
 
 #include <entities/crate.cpp>
 #include <entities/entity.cpp>
@@ -26,7 +30,6 @@
 #include <render/armaturecomponent.cpp>
 #include <render/material.cpp>
 #include <render/model.cpp>
-#include <render/opengl_loader.cpp>
 #include <render/opengl_renderer.cpp>
 #include <render/opengl_shader.cpp>
 #include <render/render.cpp>

@@ -12,25 +12,7 @@ namespace Core {
     class RenderComponent;
     class ArmatureComponent;
     class TriggerComponent;
-    
-    // the way the animation system is implemented right now, if you
-    // start an animation before the model that the animation is
-    // played on isn't loaded, the animation will not play.
-    // this component will wait for the model to load and then start
-    // the animation.
-    class PickupWorkaroundComponent : public EntityComponent {
-    public:
-        PickupWorkaroundComponent() : model(this){}
-        void Init(){ is_ready = true; if (resources_waiting == 0) Start(); }
-        void Uninit(){ is_ready = false; }
-        void Start();
-        void MakeWorkaround(name_t model, ArmatureComponent* armcomp);
-        void EventHandler(Event &event){}
-    protected:
-        ResourceProxy<Render::Model> model;
-        ArmatureComponent* armcomp = nullptr;
-    };
-    
+        
     class Pickup : public Entity {
     public:
         Pickup(std::string_view& str);
@@ -80,7 +62,6 @@ namespace Core {
         RenderComponent* rendercomponent;
         ArmatureComponent* armaturecomponent;
         TriggerComponent* triggercomponent;
-        PickupWorkaroundComponent* workaroundcomponent;
     };
 }
 

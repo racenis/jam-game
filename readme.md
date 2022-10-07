@@ -1,7 +1,7 @@
 # Dzīvības Partikula
 This game was made for the "Alternative Engine Game Jam"
 
-Source code for the engine is on the [github](https://github.com/racenis/tram-sdk).
+Source code for the engine is on the github, the version of the engine you need is [v0.0.2-alpha](https://github.com/racenis/tram-sdk/releases/tag/v0.0.2).
 
 Assets are self-made, if not [mentioned otherwise](assetsources.md).
 

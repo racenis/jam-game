@@ -25,12 +25,12 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="MinGW ( C:\mingw64\bin\ )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-O0;-std=c++20;-Wall" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
+      <Compiler Options="-g;-O0;-std=c++20;-Wall;-pg" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="."/>
         <IncludePath Value="../tram-sdk/src"/>
         <IncludePath Value="../tram-sdk/libraries"/>
       </Compiler>
-      <Linker Options="-lglfw3;-lgdi32;-lopengl32;-static-libgcc;-static-libstdc++;-static" Required="yes">
+      <Linker Options="-lglfw3;-lgdi32;-lopengl32;-static-libgcc;-static-libstdc++;-static;-pg" Required="yes">
         <LibraryPath Value="../tram-sdk/libraries"/>
         <Library Value="libBulletSoftBody.a"/>
         <Library Value="libBulletDynamics.a"/>

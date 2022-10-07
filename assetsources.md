@@ -22,4 +22,5 @@ All sounds are in the ```data/audio``` directory.
 | moshkis_attack.ogg | *qubodup/Iwan Gabovitch* | [melee sounds.zip](https://opengameart.org/content/3-melee-sounds) | CC0 |
 | moshkis_pop.ogg | *farfadet46* | [pop.ogg](https://opengameart.org/content/bubbles-pop) | CC0 |
 | moskis_hit.ogg | *Spring Spring* | [best_snare.wav](https://opengameart.org/content/an-interesting-snare-drum-sound) | CC0 |
+| pickup_click.ogg | *Nicole Marie T* | [Light Switch Click On Sfx.wav](https://opengameart.org/content/light-switch-on-sfx-sound-effect) | CC-BY 4.0 |
 | pickup_pickup.ogg | *Vinrax* | [key_pickup.ogg](https://opengameart.org/content/key-pickup) | CC-BY 3.0 |

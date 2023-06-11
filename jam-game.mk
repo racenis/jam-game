@@ -14,7 +14,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Poga
-Date                   :=07/10/2022
+Date                   :=11/06/2023
 CodeLitePath           :="C:/Program Files/CodeLite"
 MakeDirCommand         :=mkdir
 LinkerName             :=C:/mingw64/bin/g++.exe
@@ -39,13 +39,13 @@ ObjectsFileList        :=$(IntermediateDirectory)/ObjectsList.txt
 PCHCompileFlags        :=
 RcCmpOptions           := 
 RcCompilerName         :=C:/mingw64/bin/windres.exe
-LinkOptions            :=  -lglfw3 -lgdi32 -lopengl32 -static-libgcc -static-libstdc++ -static -pg
+LinkOptions            :=  -lglfw3 -lgdi32 -lopengl32 -static-libgcc -static-libstdc++ -static
 IncludePath            :=  $(IncludeSwitch). $(IncludeSwitch). $(IncludeSwitch)../tram-sdk/src $(IncludeSwitch)../tram-sdk/libraries 
 IncludePCH             := 
 RcIncludePath          := 
-Libs                   := $(LibrarySwitch)BulletSoftBody $(LibrarySwitch)BulletDynamics $(LibrarySwitch)BulletCollision $(LibrarySwitch)LinearMath $(LibrarySwitch)glfw3 $(LibrarySwitch)OpenAL32.dll 
-ArLibs                 :=  "libBulletSoftBody.a" "libBulletDynamics.a" "libBulletCollision.a" "libLinearMath.a" "libglfw3.a" "libOpenAL32.dll.a" 
-LibPath                := $(LibraryPathSwitch). $(LibraryPathSwitch)../tram-sdk/libraries 
+Libs                   := $(LibrarySwitch)tramsdk $(LibrarySwitch)BulletSoftBody $(LibrarySwitch)BulletDynamics $(LibrarySwitch)BulletCollision $(LibrarySwitch)LinearMath $(LibrarySwitch)glfw3 $(LibrarySwitch)OpenAL32 
+ArLibs                 :=  "libtramsdk.a" "libBulletSoftBody.a" "libBulletDynamics.a" "libBulletCollision.a" "libLinearMath.a" "libglfw3.a" "libOpenAL32.a" 
+LibPath                := $(LibraryPathSwitch). $(LibraryPathSwitch)../tram-sdk/libraries/binaries/win64 $(LibraryPathSwitch)../tram-sdk/ 
 
 ##
 ## Common variables
@@ -54,7 +54,7 @@ LibPath                := $(LibraryPathSwitch). $(LibraryPathSwitch)../tram-sdk/
 AR       := C:/mingw64/bin/ar.exe rcu
 CXX      := C:/mingw64/bin/g++.exe
 CC       := C:/mingw64/bin/gcc.exe
-CXXFLAGS :=  -g -O0 -std=c++20 -Wall -pg $(Preprocessors)
+CXXFLAGS :=  -g -O0 -std=c++20 -Wall $(Preprocessors)
 CFLAGS   :=  -g -O0 -Wall $(Preprocessors)
 ASFLAGS  := 
 AS       := C:/mingw64/bin/as.exe

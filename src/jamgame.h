@@ -3,15 +3,17 @@
 #ifndef JAMGAME_H
 #define JAMGAME_H
 
-#include <core.h>
+#include <framework/core.h>
+#include <framework/uid.h>
+#include <framework/math.h>
 
-namespace Core {
+namespace tram {
     class Player;
 }
 
-extern Core::Player* main_player;
+extern tram::Player* main_player;
 
-void PlayerPickedUpPickup(Core::name_t pickup_model);
+void PlayerPickedUpPickup(tram::name_t pickup_model);
 
 void PlayerGotHitInFace(uint64_t oof_size);
 

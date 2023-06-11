@@ -6,7 +6,7 @@
 #include "moshkiscomponent.h"
 #include "jamgame.h"
 
-using namespace Core;
+using namespace tram;
 
 template <> Pool<MoshkisComponent> PoolProxy<MoshkisComponent>::pool("moshkis component pool", 100);
 
@@ -42,16 +42,13 @@ void MoshkisComponent::OofMoshkis(uint64_t oof_strength) {
 
 void MoshkisComponent::UpdateMoshkis() {
     if (!(physcomp->IsReady() && armcomp->IsReady())) return;
-    if (!rotation_disabled) { physcomp->DisableRotation(); rotation_disabled = true; }
+    if (!rotation_disabled) { physcomp->SetAngularFactor({0.0f, 0.0f, 0.0f}); rotation_disabled = true; }
 
     assert(main_player);
     
-    glm::vec3 player_location;
-    glm::vec3 moshkis_location;
-    glm::quat moshkis_rotation;
-    main_player->GetLocation(player_location);
-    parent->GetLocation(moshkis_location);
-    parent->GetRotation(moshkis_rotation);
+    vec3 player_location = main_player->GetLocation();
+    vec3 moshkis_location = parent->GetLocation();
+    quat moshkis_rotation = parent->GetRotation();
     
     if (moshkis_state == MOSHKIS_IDLE) {
         if (!armcomp->IsPlayingAnimation(UID("MoshkisIdle"))) armcomp->PlayAnimation(UID("MoshkisIdle"), -1, 1.0f, 1.0f);
@@ -60,21 +57,23 @@ void MoshkisComponent::UpdateMoshkis() {
             auto moshkis_to_player = glm::normalize(player_location - moshkis_location);
             auto moshkis_front = glm::normalize(moshkis_rotation * glm::vec3(0.0f, 0.0f, -1.0f));
             
-            auto raycast_result = Physics::Raycast(moshkis_location, player_location);
+            auto raycast_result = Physics::Raycast(moshkis_location, player_location).collider;
             
             if (glm::dot(moshkis_front, moshkis_to_player) > 0.2f && raycast_result && raycast_result->GetParent() && raycast_result->GetParent()->GetName() == UID("player")) {
                 moshkis_state = MOSHKIS_CHARGE;
                 
                 armcomp->StopAnimation(UID("MoshkisIdle"));
                 armcomp->PlayAnimation(UID("MoshkisWalk"), -1, 1.0f, 1.0f);
-                physcomp->DisableActivation(); // will actually disable deactivation
+                //physcomp->DisableActivation(); // will actually disable deactivation
+                physcomp->SetActivation(true);
             }
         }
     } else if (moshkis_state == MOSHKIS_CHARGE) {
         if (glm::distance(player_location, moshkis_location) > 15.0f) {
             moshkis_state = MOSHKIS_IDLE;
             armcomp->StopAnimation(UID("MoshkisWalk"));
-            physcomp->EnableActivation(); // will actually enable deactivation
+            //physcomp->EnableActivation(); // will actually enable deactivation
+            physcomp->SetActivation(false);
         } else if (glm::distance(player_location, moshkis_location) < 1.5f) {
             moshkis_state = MOSHKIS_ATTACK;
             attack_frames = 0;
@@ -88,7 +87,7 @@ void MoshkisComponent::UpdateMoshkis() {
             glm::quat moshkis_new_rotation = glm::quatLookAt(moshkis_new_front, glm::vec3(0.0f, 1.0f, 0.0f));
             physcomp->SetRotation(moshkis_new_rotation);
             
-            if (physcomp->GetVelocity() < 4.0f) physcomp->PushLocal(glm::vec3(0.0f, 0.0f, -25.0f));
+            if (glm::length(physcomp->GetVelocity()) < 4.0f) physcomp->Push(moshkis_new_rotation * glm::vec3(0.0f, 0.0f, -25.0f));
         }
     } else if (moshkis_state == MOSHKIS_ATTACK) {
         if (!armcomp->IsPlayingAnimation(UID("MoshkisAttack"))) {
@@ -99,9 +98,9 @@ void MoshkisComponent::UpdateMoshkis() {
         if (attack_frames == 50) {
             auto moshkis_to_player = glm::normalize(player_location - moshkis_location);
             auto moshkis_front = glm::normalize(moshkis_rotation * glm::vec3(0.0f, 0.0f, -1.0f));
-            auto raycast_result = Physics::Raycast(moshkis_location, player_location);
+            auto raycast_result = Physics::Raycast(moshkis_location, player_location).collider;
             if (glm::dot(moshkis_front, moshkis_to_player) > 0.2f && raycast_result && raycast_result->GetParent() && raycast_result->GetParent()->GetName() == UID("player")) {
-                PlaySoundEffect(SOUND_MOSHKIS_HIT, Render::CAMERA_POSITION);
+                PlaySoundEffect(SOUND_MOSHKIS_HIT, Render::GetCameraPosition());
                 PlayerGotHitInFace(100);
             }
         }

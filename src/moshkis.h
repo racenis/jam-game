@@ -3,10 +3,11 @@
 #ifndef MOSHKIS_H
 #define MOSHKIS_H
 
-#include <core.h>
-#include <serializeddata.h>
+#include <framework/core.h>
+#include <framework/serialization.h>
+#include <framework/entity.h>
 
-namespace Core {
+namespace tram {
     class RenderComponent;
     class PhysicsComponent;
     class ArmatureComponent;
@@ -14,7 +15,8 @@ namespace Core {
     
     class Moshkis : public Entity {
     public:
-        Moshkis(std::string_view& str);
+        Moshkis(const SharedEntityData& shared_data, const SerializedFieldArray& field_array);
+        ~Moshkis();
 
         void UpdateParameters();
         void SetParameters();
@@ -23,41 +25,14 @@ namespace Core {
         void Serialize();
         void MessageHandler(Message& msg);
 
-        class Data: public SerializedEntityData {
-        public:
-            Field<uint64_t> health;
-
-            void ToString(std::string& str) {
-                health.ToString(str);
-            }
-
-            void FromString(std::string_view& str) {
-                health.FromString(str);
-            }
-            
-            name_t GetEditorModel() {
-                return UID("creatures/moshkis");
-            }
-            
-            std::vector<FieldInfo> GetEditorFieldInfo() {
-                return std::vector<FieldInfo> {
-                    { FieldInfo::FIELD_UINT64, "Health", &health }
-                };
-            }
-            
-            char const* GetDataName() {
-                return "moshkis";
-            }
-            
-            char const* GetEditorName() {
-                return "Moshkis";
-            }
-        };
+        static void Register();
     protected:
         RenderComponent* rendercomponent;
         PhysicsComponent* physicscomponent;
         ArmatureComponent* armaturecomponent;
         MoshkisComponent* moshkiscomponent;
+        
+        uint64_t health;
     };
 }
 
